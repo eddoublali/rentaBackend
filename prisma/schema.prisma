@@ -1,0 +1,292 @@
+// Génère le client Prisma pour interagir avec la base de données 
+generator client {
+  provider = "prisma-client-js"
+}
+
+// Configuration de la source de données (base de données MySQL)
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+// Utilisateurs de l'application
+model User {
+  id           Int           @id @default(autoincrement())
+  name         String        // Nom de l'utilisateur
+  email        String        @unique // Email unique
+  password     String        // Mot de passe
+  role         Role          @default(ADMIN) // Rôle de l'utilisateur
+  
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+}
+
+// Rôles disponibles dans le système
+enum Role {
+  ADMIN            // Administrateur principal du système
+  ACCOUNTANT       // Responsable de la comptabilité
+  ADMINISTRATEUR   // Autre administrateur avec des permissions spécifiques
+}
+
+// Informations sur les clients
+model Client {
+  id              Int            @id @default(autoincrement())
+  name            String         // Nom complet ou nom de l'entreprise
+  phone           String         // Numéro de téléphone
+  email           String         @unique // Email
+  cin             String         // Numéro de carte d'identité
+  cinExpiry       DateTime?      // Date d'expiration de la carte d'identité
+  license         String         // Permis de conduire ou licence d'entreprise
+  address         String         // Adresse
+  blacklisted     Boolean        @default(false) // Liste noire ?
+  nationality     String         // Nationalité
+  passportNumber  String?        // Numéro de passeport
+  passportExpiry  DateTime?      // Expiration du passeport
+  birthDate       DateTime?      // Date de naissance (optional for enterprises)
+  companyName     String?        // Nom de l'entreprise (si applicable)
+  registrationNumber String?     // Numéro d'enregistrement de l'entreprise (si applicable)
+  clientType      ClientType     @default(PERSONAL) // Type de client
+  
+  // Relations
+  documents       Document[]     // Documents liés
+  reservations    Reservation[]  // Réservations faites en tant que client principal
+  secondaryReservations Reservation[] @relation("SecondaryClient") // Réservations en tant que second conducteur
+  rentals         Rental[]       // Locations effectuées en tant que client
+  contracts       Contract[]     // Contrats associés au client
+  invoices        Invoice[]      // Factures associées au client
+
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+}
+
+enum ClientType {
+  PERSONAL    // Client individuel
+  ENTERPRISE  // Client entreprise
+}
+
+// Informations sur les véhicules
+model Vehicle {
+  id              Int           @id @default(autoincrement())
+  brand           String        // Marque
+  model           String        // Modèle
+  category        String?       // Catégorie
+  plateNumber     String        @unique // Numéro d'immatriculation
+  chassisNumber   String        @unique // Numéro de châssis
+  year            Int           // Année de fabrication
+  color           String        // Couleur
+  doors           Int           // Nombre de portes
+  fuelType        String        // Type de carburant
+  gearbox         String        // Boîte de vitesse
+  mileage         Int           // Kilométrage
+  status          VehicleStatus @default(AVAILABLE) // Statut
+  type            VehicleType   @default(CAR) // Type de véhicule
+  dailyPrice      Float         // Prix journalier
+  image           String?       // Image du véhicule
+  oilChange       DateTime?     // Date du dernier vidange
+  timingBelt      DateTime?     // Courroie de distribution
+  purchaseDate    DateTime?     // Date d'achat
+  purchasePrice   Float?        // Prix d'achat
+  advancePayment  Float?        // Acompte
+  remainingMonths Int?          // Mois restants
+  monthlyPayment  Float?        // Paiement mensuel
+  paymentDay      Int?          // Jour de paiement
+  registrationCard String?      // Carte grise
+  insurance        String?      // Assurance
+  technicalVisit   String?      // Visite technique
+  authorization    String?      // Autorisation
+  taxSticker       String?      // Vignette
+  
+  // Relations
+  reservations     Reservation[] // Réservations liées
+  rentals          Rental[]      // Locations liées
+  contracts        Contract[]    // Contrats liés
+  infractions      Infraction[]  // Infractions liées
+
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+}
+
+// Statut du véhicule
+enum VehicleStatus {
+  AVAILABLE       // Disponible
+  RENTED          // Loué
+  MAINTENANCE     // En maintenance
+}
+
+// Type de véhicule
+enum VehicleType {
+  CAR             // Voiture
+  TRUCK           // Camion
+  MOTORCYCLE      // Moto
+  OTHER           // Autre
+}
+
+// Réservations
+model Reservation {
+  id               Int               @id @default(autoincrement())
+  vehicleId        Int
+  vehicle          Vehicle           @relation(fields: [vehicleId], references: [id])
+  clientId         Int
+  client           Client            @relation(fields: [clientId], references: [id])
+  startDate        DateTime          // Date de début
+  endDate          DateTime          // Date de fin
+  totalAmount      Float             // Montant total
+  deliveryLocation String            // Lieu de livraison
+  returnLocation   String            // Lieu de retour
+  additionalCharge Float?            // Frais supplémentaires
+  fuelLevel        Int               // Niveau de carburant
+  departureKm      Int               // Kilométrage de départ
+  secondDriver     Boolean           @default(false) // Deuxième conducteur
+  clientSeconId    Int?
+  secondClient     Client?           @relation("SecondaryClient", fields: [clientSeconId], references: [id])
+  status           ReservationStatus @default(PENDING) // Statut
+  
+  // Relations
+  payment          Payment?          // Paiement associé
+  invoices         Invoice[]         // Factures associées
+	
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+}
+
+// Statut d'une réservation
+enum ReservationStatus {
+  PENDING
+  CONFIRMED
+  COMPLETED
+  CANCELED
+}
+
+// Paiements
+model Payment {
+  id             Int            @id @default(autoincrement())
+  reservationId  Int            @unique
+  reservation    Reservation    @relation(fields: [reservationId], references: [id])
+  amount         Float          // Montant payé
+  paymentMethod  PaymentMethod  // Mode de paiement
+  status         PaymentStatus  @default(PENDING) // Statut du paiement
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+}
+
+// Statut d'un paiement
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+}
+
+// Méthodes de paiement
+enum PaymentMethod {
+  CASH
+  CREDIT_CARD
+  BANK_TRANSFER
+}
+
+// Documents liés au client
+model Document {
+  id             Int           @id @default(autoincrement())
+  clientId       Int
+  client         Client        @relation(fields: [clientId], references: [id])
+  image          String?       //  Chemin ou URL de l'image liée au document
+  documentType   DocumentType  // Type de document
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+}
+
+// Types de documents
+enum DocumentType {
+  CIN
+  PERMIT
+  PASSPORT
+  INSURANCE
+  BUSINESS_LICENSE
+  OTHERS
+}
+
+// Contrats de location
+model Contract {
+  id             Int            @id @default(autoincrement())
+  clientId       Int
+  client         Client         @relation(fields: [clientId], references: [id])
+  vehicleId      Int
+  vehicle        Vehicle        @relation(fields: [vehicleId], references: [id])
+  startDate      DateTime
+  endDate        DateTime
+  totalAmount    Float
+  paymentStatus  PaymentStatus  @default(PENDING)
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+}
+
+// Factures
+model Invoice {
+  id             Int            @id @default(autoincrement())
+  reservationId  Int
+  reservation    Reservation    @relation(fields: [reservationId], references: [id])
+  clientId       Int
+  client         Client         @relation(fields: [clientId], references: [id])
+  amount         Float          // Montant de la facture
+  dueDate        DateTime       // Date d'échéance
+  paymentStatus  PaymentStatus  @default(PENDING)
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+}
+
+// Infractions liées aux véhicules
+model Infraction {
+  id              Int              @id @default(autoincrement())
+  vehicleId       Int
+  vehicle         Vehicle          @relation(fields: [vehicleId], references: [id])
+  infractionType  String           // Type d'infraction
+  fineAmount      Float            // Montant de l'amende
+  infractionDate  DateTime         // Date de l'infraction
+  status          InfractionStatus @default(PENDING)
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+}
+
+// Statut des infractions
+enum InfractionStatus {
+  PENDING
+  PAID
+  UNPAID
+}
+
+// Locations associées à un utilisateur (client)
+model Rental {
+  id        Int      @id @default(autoincrement())
+ 
+  vehicleId Int
+  vehicle   Vehicle  @relation(fields: [vehicleId], references: [id])
+  clientId  Int
+  client    Client   @relation(fields: [clientId], references: [id])
+  startDate DateTime // Date de début
+  endDate   DateTime // Date de fin
+}
+
+// Revenus générés par l'entreprise
+model Revenue {
+  id          Int       @id @default(autoincrement())
+  title       String    // Titre ou description du revenu
+  amount      Float     // Montant du revenu
+  source      String    // Source du revenu (e.g. réservation, autre)
+  date        DateTime  // Date du revenu
+  notes       String?   // Remarques supplémentaires
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+// Dépenses effectuées par l'entreprise
+model Expense {
+  id          Int       @id @default(autoincrement())
+  title       String    // Titre ou description de la charge
+  amount      Float     // Montant de la charge
+  category    String    // Catégorie (e.g. entretien, assurance, carburant)
+  date        DateTime  // Date de la charge
+  notes       String?   // Remarques supplémentaires
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
