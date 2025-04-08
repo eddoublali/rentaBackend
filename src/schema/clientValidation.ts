@@ -8,6 +8,7 @@ export const clientSchema = z.object({
   cin: z.string().min(1, 'CIN is required'),
   cinExpiry: z.string().datetime().optional(), // optional field
   license: z.string().min(1, 'License is required'),
+  licenseExpiry: z.string().datetime().optional(), // optional field
   blacklisted: z.boolean().default(false),
   nationality: z.string().min(1, 'Nationality is required'),
   passportNumber: z.string().optional(),

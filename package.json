@@ -17,7 +17,9 @@
     "express": "^5.1.0",
     "joi": "^17.13.3",
     "jsonwebtoken": "^9.0.2",
+    "migrate": "^2.1.0",
     "mysql2": "^3.14.0",
+    "reset": "^0.1.0",
     "zod": "^3.24.2"
   },
   "devDependencies": {

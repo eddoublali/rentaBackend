@@ -4,7 +4,6 @@ import vehicleRouter from "./vehicle";
 import clientRouter from "./client";
 import userRouter from "./user";
 import reservationRouter from "./reservation";
-import paymentRouter from "./payment";
 import documentRouter from "./document";
 import contracRouter from "./contract";
 import invoiceRouter from "./invoice";
@@ -21,7 +20,6 @@ rootRouter.use('/vehicle',vehicleRouter)
 rootRouter.use('/client',clientRouter)
 rootRouter.use('/user',userRouter)
 rootRouter.use('/reservation',reservationRouter)
-rootRouter.use('/payment',paymentRouter)
 rootRouter.use('/document',documentRouter)
 rootRouter.use('/contrac',contracRouter)
 rootRouter.use('/invoice',invoiceRouter)

@@ -21,6 +21,7 @@ CREATE TABLE `Client` (
     `cin` VARCHAR(191) NOT NULL,
     `cinExpiry` DATETIME(3) NULL,
     `license` VARCHAR(191) NOT NULL,
+    `licenseExpiry` DATETIME(3) NULL,
     `address` VARCHAR(191) NOT NULL,
     `blacklisted` BOOLEAN NOT NULL DEFAULT false,
     `nationality` VARCHAR(191) NOT NULL,
@@ -92,23 +93,11 @@ CREATE TABLE `Reservation` (
     `secondDriver` BOOLEAN NOT NULL DEFAULT false,
     `clientSeconId` INTEGER NULL,
     `status` ENUM('PENDING', 'CONFIRMED', 'COMPLETED', 'CANCELED') NOT NULL DEFAULT 'PENDING',
-    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
-    `updatedAt` DATETIME(3) NOT NULL,
-
-    PRIMARY KEY (`id`)
-) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-
--- CreateTable
-CREATE TABLE `Payment` (
-    `id` INTEGER NOT NULL AUTO_INCREMENT,
-    `reservationId` INTEGER NOT NULL,
-    `amount` DOUBLE NOT NULL,
     `paymentMethod` ENUM('CASH', 'CREDIT_CARD', 'BANK_TRANSFER') NOT NULL,
-    `status` ENUM('PENDING', 'PAID', 'FAILED') NOT NULL DEFAULT 'PENDING',
+    `paymentStatus` ENUM('PENDING', 'PAID', 'FAILED') NOT NULL DEFAULT 'PENDING',
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
 
-    UNIQUE INDEX `Payment_reservationId_key`(`reservationId`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -116,6 +105,7 @@ CREATE TABLE `Payment` (
 CREATE TABLE `Document` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `clientId` INTEGER NOT NULL,
+    `image` VARCHAR(191) NULL,
     `documentType` ENUM('CIN', 'PERMIT', 'PASSPORT', 'INSURANCE', 'BUSINESS_LICENSE', 'OTHERS') NOT NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
@@ -181,6 +171,9 @@ CREATE TABLE `Rental` (
 CREATE TABLE `Revenue` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `title` VARCHAR(191) NOT NULL,
+    `clientId` INTEGER NOT NULL,
+    `reservationId` INTEGER NOT NULL,
+    `vehicleId` INTEGER NOT NULL,
     `amount` DOUBLE NOT NULL,
     `source` VARCHAR(191) NOT NULL,
     `date` DATETIME(3) NOT NULL,
@@ -215,9 +208,6 @@ ALTER TABLE `Reservation` ADD CONSTRAINT `Reservation_clientId_fkey` FOREIGN KEY
 ALTER TABLE `Reservation` ADD CONSTRAINT `Reservation_clientSeconId_fkey` FOREIGN KEY (`clientSeconId`) REFERENCES `Client`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `Payment` ADD CONSTRAINT `Payment_reservationId_fkey` FOREIGN KEY (`reservationId`) REFERENCES `Reservation`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
 ALTER TABLE `Document` ADD CONSTRAINT `Document_clientId_fkey` FOREIGN KEY (`clientId`) REFERENCES `Client`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
@@ -240,3 +230,12 @@ ALTER TABLE `Rental` ADD CONSTRAINT `Rental_vehicleId_fkey` FOREIGN KEY (`vehicl
 
 -- AddForeignKey
 ALTER TABLE `Rental` ADD CONSTRAINT `Rental_clientId_fkey` FOREIGN KEY (`clientId`) REFERENCES `Client`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `Revenue` ADD CONSTRAINT `Revenue_clientId_fkey` FOREIGN KEY (`clientId`) REFERENCES `Client`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `Revenue` ADD CONSTRAINT `Revenue_reservationId_fkey` FOREIGN KEY (`reservationId`) REFERENCES `Reservation`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `Revenue` ADD CONSTRAINT `Revenue_vehicleId_fkey` FOREIGN KEY (`vehicleId`) REFERENCES `Vehicle`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;

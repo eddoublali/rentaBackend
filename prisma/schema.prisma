@@ -37,6 +37,7 @@ model Client {
   cin             String         // Numéro de carte d'identité
   cinExpiry       DateTime?      // Date d'expiration de la carte d'identité
   license         String         // Permis de conduire ou licence d'entreprise
+  licenseExpiry  DateTime?      // Date d'expiration du permis de conduire ou
   address         String         // Adresse
   blacklisted     Boolean        @default(false) // Liste noire ?
   nationality     String         // Nationalité
@@ -54,6 +55,8 @@ model Client {
   rentals         Rental[]       // Locations effectuées en tant que client
   contracts       Contract[]     // Contrats associés au client
   invoices        Invoice[]      // Factures associées au client
+  revenues         Revenue[]     // Revenus générés par le client
+
 
   createdAt       DateTime       @default(now())
   updatedAt       DateTime       @updatedAt
@@ -101,6 +104,8 @@ model Vehicle {
   rentals          Rental[]      // Locations liées
   contracts        Contract[]    // Contrats liés
   infractions      Infraction[]  // Infractions liées
+  revenues         Revenue[]     // Revenus générés par le véhicule
+
 
   createdAt        DateTime     @default(now())
   updatedAt        DateTime     @updatedAt
@@ -140,10 +145,13 @@ model Reservation {
   clientSeconId    Int?
   secondClient     Client?           @relation("SecondaryClient", fields: [clientSeconId], references: [id])
   status           ReservationStatus @default(PENDING) // Statut
-  
+  paymentMethod  PaymentMethod  // Mode de paiement
+  paymentStatus    PaymentStatus     @default(PENDING) // Statut du paiement
+
   // Relations
-  payment          Payment?          // Paiement associé
   invoices         Invoice[]         // Factures associées
+  revenues         Revenue[]     // Revenus générés par le reservation
+
 	
   createdAt        DateTime          @default(now())
   updatedAt        DateTime          @updatedAt
@@ -157,17 +165,6 @@ enum ReservationStatus {
   CANCELED
 }
 
-// Paiements
-model Payment {
-  id             Int            @id @default(autoincrement())
-  reservationId  Int            @unique
-  reservation    Reservation    @relation(fields: [reservationId], references: [id])
-  amount         Float          // Montant payé
-  paymentMethod  PaymentMethod  // Mode de paiement
-  status         PaymentStatus  @default(PENDING) // Statut du paiement
-  createdAt      DateTime       @default(now())
-  updatedAt      DateTime       @updatedAt
-}
 
 // Statut d'un paiement
 enum PaymentStatus {
@@ -267,15 +264,22 @@ model Rental {
 
 // Revenus générés par l'entreprise
 model Revenue {
-  id          Int       @id @default(autoincrement())
-  title       String    // Titre ou description du revenu
-  amount      Float     // Montant du revenu
-  source      String    // Source du revenu (e.g. réservation, autre)
-  date        DateTime  // Date du revenu
-  notes       String?   // Remarques supplémentaires
+  id             Int       @id @default(autoincrement())
+  title          String    // Titre ou description du revenu
+  clientId       Int       // ID du client associé
+  client         Client    @relation(fields: [clientId], references: [id])
+  reservationId  Int       // ID de la réservation associée
+  reservation    Reservation @relation(fields: [reservationId], references: [id])
+  vehicleId      Int       // ID du véhicule associé
+  vehicle        Vehicle   @relation(fields: [vehicleId], references: [id])
 
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  amount         Float     // Montant du revenu
+  source         String    // Source du revenu (réservation)
+  date           DateTime  // Date du revenu
+  notes          String?   // Remarques supplémentaires
+
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
 }
 
 // Dépenses effectuées par l'entreprise
