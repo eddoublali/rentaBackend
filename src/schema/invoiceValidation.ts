@@ -1,6 +1,7 @@
 import { z } from 'zod';
 
-// Enum for PaymentStatus
+// Enum for PaymentStatus 
+// Factures
 export const paymentStatusEnum = z.enum(['PENDING', 'PAID', 'FAILED']); 
 
 // Full schema for creating an invoice

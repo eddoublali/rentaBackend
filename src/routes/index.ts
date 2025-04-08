@@ -9,6 +9,7 @@ import documentRouter from "./document";
 import contracRouter from "./contract";
 import invoiceRouter from "./invoice";
 import infractionRouter from "./infraction";
+import expenseRouter from "./expense";
 
 
 // craete root router to combine all the routes
@@ -25,5 +26,6 @@ rootRouter.use('/document',documentRouter)
 rootRouter.use('/contrac',contracRouter)
 rootRouter.use('/invoice',invoiceRouter)
 rootRouter.use('/infraction',infractionRouter)
+rootRouter.use('/expense',expenseRouter)
 
 export default rootRouter;
