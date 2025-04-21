@@ -60,6 +60,10 @@ export const updateClient = async (req: Request, res: Response): Promise<void> =
       res.status(400).json({ message: 'Invalid Client ID' });
       return;
     }
+    if (req.body.blacklisted) {
+      // Parse the string to boolean
+      req.body.blacklisted = req.body.blacklisted === 'true' || req.body.blacklisted === '1';
+    }
 
     const validatedClient = clientUpdateSchema.parse(req.body);
 
