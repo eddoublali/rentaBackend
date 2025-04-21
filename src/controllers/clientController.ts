@@ -11,40 +11,40 @@ import { z } from 'zod';
  */
 export const createClient = async (req: Request, res: Response): Promise<void> => {
   try {
-    // Validate and parse the request body using the clientSchema
     const validatedClient = clientSchema.parse(req.body);
 
-    // Check if the email already exists in the database
     const existingClient = await prismaClient.client.findUnique({
       where: { email: validatedClient.email },
-      
     });
 
     if (existingClient) {
-       res.status(400).json({
-        message: 'Client with this email already exists',
-      });
+      res.status(400).json({ message: 'Client with this email already exists' });
+      return;
     }
 
-    // Create the client in the database using Prisma
+    const files = req.files as { [fieldname: string]: Express.Multer.File[] };
+    const cinimage = files?.cinimage ? `/uploads/${files.cinimage[0].filename}` : '';
+    const licenseimage = files?.licenseimage ? `/uploads/${files.licenseimage[0].filename}` : '';
+
     const client = await prismaClient.client.create({
       data: {
         ...validatedClient,
+        cinimage,
+        licenseimage,
       },
     });
 
-    // Respond with the created client data
     res.status(201).json({ message: 'Client created successfully', client });
   } catch (error) {
-    // If validation fails, send a response with validation errors
     if (error instanceof z.ZodError) {
-       res.status(400).json({ message: 'Validation failed', errors: error.errors });
+      res.status(400).json({ message: 'Validation failed', errors: error.errors });
+      return;
     }
 
-    // Handle other unexpected errors
     res.status(500).json({ message: 'Something went wrong', error });
   }
 };
+
 
 /**
  * @desc Update an existing client
@@ -53,63 +53,61 @@ export const createClient = async (req: Request, res: Response): Promise<void> =
  * @access protected
  */
 export const updateClient = async (req: Request, res: Response): Promise<void> => {
-    try {
-      const { id } = req.params; // Get the client ID from the URL parameters
-      const userId = Number(id);
-      if (isNaN(userId)) {
-         res.status(400).json({ message: 'Invalid Client ID' });
-      }
-  
-      // Validate and parse the request body using the clientSchema
-      const validatedClient = clientUpdateSchema.parse(req.body);
-  
-      // Check if the client exists in the database
-      const existingClient = await prismaClient.client.findUnique({
-        where: { id: userId  },
-      });
-  
-      if (!existingClient) {
-        res.status(404).json({
-          message: 'Client not found',
-        });
-        return;
-      }
-  
-      // Check if the email has been changed and is already in use by another client
-      if (existingClient.email !== validatedClient.email) {
-        const clientWithEmail = await prismaClient.client.findUnique({
-          where: { email: validatedClient.email },
-        });
-  
-        if (clientWithEmail) {
-          res.status(400).json({
-            message: 'Client with this email already exists',
-          });
-          return;
-        }
-      }
-  
-      // Update the client in the database using Prisma
-      const updatedClient = await prismaClient.client.update({
-        where: { id: userId  },
-        data: {
-          ...validatedClient,
-        },
-      });
-  
-      // Respond with the updated client data
-      res.status(200).json({ message: 'Client updated successfully', updatedClient });
-    } catch (error) {
-      // If validation fails, send a response with validation errors
-      if (error instanceof z.ZodError) {
-        res.status(400).json({ message: 'Validation failed', errors: error.errors });
-        return;
-      }
-  
-      // Handle other unexpected errors
-      res.status(500).json({ message: 'Something went wrong', error });
+  try {
+    const { id } = req.params;
+    const userId = Number(id);
+    if (isNaN(userId)) {
+      res.status(400).json({ message: 'Invalid Client ID' });
+      return;
     }
-  };
+
+    const validatedClient = clientUpdateSchema.parse(req.body);
+
+    const existingClient = await prismaClient.client.findUnique({
+      where: { id: userId },
+    });
+
+    if (!existingClient) {
+      res.status(404).json({ message: 'Client not found' });
+      return;
+    }
+
+    if (existingClient.email !== validatedClient.email) {
+      const clientWithEmail = await prismaClient.client.findUnique({
+        where: { email: validatedClient.email },
+      });
+
+      if (clientWithEmail) {
+        res.status(400).json({ message: 'Client with this email already exists' });
+        return;
+      }
+    }
+
+    const files = req.files as { [fieldname: string]: Express.Multer.File[] };
+    const cinimage = files?.cinimage ? `/uploads/${files.cinimage[0].filename}` : existingClient.cinimage;
+    const licenseimage = files?.licenseimage ? `/uploads/${files.licenseimage[0].filename}` : existingClient.licenseimage;
+
+    const updatedClient = await prismaClient.client.update({
+      where: { id: userId },
+      data: {
+        ...validatedClient,
+        cinimage,
+        licenseimage,
+        blacklisted: validatedClient.blacklisted
+      },
+    });
+    console.log(updatedClient)
+
+    res.status(200).json({ message: 'Client updated successfully', updatedClient });
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      res.status(400).json({ message: 'Validation failed', errors: error.errors });
+      return;
+    }
+
+    res.status(500).json({ message: 'Something went wrong', error });
+  }
+};
 
 /**
  * @desc Get all clients
@@ -123,9 +121,9 @@ export const getAllClients = async (req: Request, res: Response): Promise<void> 
       const clients = await prismaClient.client.findMany({
         include: {
           documents: true, // Include related documents
+          infractions:true,
           reservations: true, // Include main reservations
           secondaryReservations: true, // Include secondary reservations
-          rentals: true, // Include rentals
           contracts: true, // Include contracts
           invoices: true, // Include invoices
         },
@@ -157,10 +155,9 @@ export const getClientById = async (req: Request, res: Response): Promise<void> 
         where: { id: userId },
         include: {
           documents: true, // Include related documents
+          infractions:true,
           reservations: true, // Include main reservations
-          secondaryReservations: true, // Include secondary reservations
-          rentals: true, // Include rentals
-          contracts: true, // Include contracts
+          secondaryReservations: true, // Include secondary reservations          contracts: true, // Include contracts
           invoices: true, // Include invoices
         },
       });

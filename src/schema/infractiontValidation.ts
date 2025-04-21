@@ -3,6 +3,7 @@ import { z } from 'zod';
 // Define the Infraction Schema for validation
 export const infractionSchema = z.object({
   vehicleId: z.number().int(), 
+  clientId: z.number().int(), 
   infractionType: z.string().min(1), 
   fineAmount: z.number().min(0), 
   infractionDate:z.coerce.date(), 

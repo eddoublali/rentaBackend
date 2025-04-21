@@ -9,12 +9,14 @@ import { z } from 'zod';
  * @method POST
  * @access protected
  */
+// controllers/vehicleController.ts
 export const createVehicle = async (req: Request, res: Response): Promise<void> => {
   try {
-    // Validate the request body using Zod
+    
+    // Validate the parsed data using Zod
     const validatedData = vehicleSchema.parse(req.body);
 
-    // Check if a vehicle with the same chassis number or plate number already exists
+    // Check for duplicate chassis number or plate number
     const existingVehicle = await prismaClient.vehicle.findFirst({
       where: {
         OR: [
@@ -25,26 +27,64 @@ export const createVehicle = async (req: Request, res: Response): Promise<void> 
     });
 
     if (existingVehicle) {
-       res.status(400).json({
+      res.status(400).json({
         message: 'A vehicle with the same chassis number or plate number already exists',
       });
-    }
-
-    // Create the vehicle in the database
-    const vehicle = await prismaClient.vehicle.create({
-      data: validatedData,
-    });
-
-    // Send the created vehicle as the response
-    res.status(201).json({ message: 'Vehicle created successfully', vehicle });
-  } catch (error) {
-    if (error instanceof z.ZodError) {
-      res.status(400).json({ message: 'Invalid vehicle data', errors: error.errors });
       return;
     }
 
-    console.error(error);
-    res.status(500).json({ message: 'Internal server error' });
+    // Handle all file fields
+    const files = req.files as { [fieldname: string]: Express.Multer.File[] };
+    const image = files?.image ? `/uploads/${files.image[0].filename}` : null;
+    const registrationCard = files?.registrationCard ? `/uploads/${files.registrationCard[0].filename}` : null;
+    const insurance = files?.insurance ? `/uploads/${files.insurance[0].filename}` : null;
+    const technicalVisit = files?.technicalVisit ? `/uploads/${files.technicalVisit[0].filename}` : null;
+    const authorization = files?.authorization ? `/uploads/${files.authorization[0].filename}` : null;
+    const taxSticker = files?.taxSticker ? `/uploads/${files.taxSticker[0].filename}` : null;
+
+    // Create the vehicle in the database
+    const vehicle = await prismaClient.vehicle.create({
+      data: {
+        ...validatedData,
+        image,
+        registrationCard,
+        insurance,
+        technicalVisit,
+        authorization,
+        taxSticker,
+      },
+     
+    });
+  
+    if(!vehicle){
+      res.status(404).json({message: 'Failed to create vehicle'});
+    }
+
+    res.status(201).json({ message: 'Vehicle created successfully', vehicle });
+
+  } catch (error:any) {
+    console.error('Error creating vehicle:', error);
+    if (error instanceof z.ZodError) {
+      res.status(400).json({ 
+        status: 'error',
+        message: 'Invalid vehicle data',
+        errors: error.errors
+      });
+    } else if (error.response) {
+      // Handle API errors
+      res.status(error.response.status).json({
+        status: 'error',
+        message: error.response.data.message,
+        errors: error.response.data.errors || ['Unknown server error']
+      });
+    } else {
+      // Handle other errors
+      res.status(500).json({
+        status: 'error',
+        message: 'Internal server error',
+        error: error.message
+      });
+    }
   }
 };
 /**
@@ -55,17 +95,20 @@ export const createVehicle = async (req: Request, res: Response): Promise<void> 
  */
 export const updateVehicle = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { id } = req.params; // Get the vehicle ID from the URL parameters
-    const userId = Number(id);
-    if (isNaN(userId)) {
-       res.status(400).json({ message: 'Invalid Vehicle ID' });
+    const { id } = req.params;
+    const vehicleId = Number(id);
+
+    if (isNaN(vehicleId)) {
+      res.status(400).json({ message: 'Invalid Vehicle ID' });
+      return;
     }
-    // Validate the request body using Zod
+
+    // Validate request body
     const validatedData = vehicleUpdateSchema.parse(req.body);
 
-    // Find the existing vehicle by ID
+    // Find the vehicle
     const existingVehicle = await prismaClient.vehicle.findUnique({
-      where: { id: userId },
+      where: { id: vehicleId },
     });
 
     if (!existingVehicle) {
@@ -73,24 +116,22 @@ export const updateVehicle = async (req: Request, res: Response): Promise<void> 
       return;
     }
 
-    // If chassis number or plate number is changed, check for duplicates
+    // Check for chassis/plate number duplicates (excluding self)
     if (
       existingVehicle.chassisNumber !== validatedData.chassisNumber ||
       existingVehicle.plateNumber !== validatedData.plateNumber
     ) {
-      const vehicleWithSameChassisOrPlate = await prismaClient.vehicle.findFirst({
+      const duplicateVehicle = await prismaClient.vehicle.findFirst({
         where: {
           OR: [
             { chassisNumber: validatedData.chassisNumber },
             { plateNumber: validatedData.plateNumber },
           ],
-          NOT: {
-            id: userId, // Ignore the current vehicle from this check
-          },
+          NOT: { id: vehicleId },
         },
       });
 
-      if (vehicleWithSameChassisOrPlate) {
+      if (duplicateVehicle) {
         res.status(400).json({
           message: 'A vehicle with the same chassis number or plate number already exists',
         });
@@ -98,26 +139,58 @@ export const updateVehicle = async (req: Request, res: Response): Promise<void> 
       }
     }
 
-    // Update the vehicle in the database
+    // Handle uploaded files
+    const files = req.files as { [fieldname: string]: Express.Multer.File[] };
+    const image = files?.image?.[0]?.filename ? `/uploads/${files.image[0].filename}` : existingVehicle.image;
+    const registrationCard = files?.registrationCard?.[0]?.filename
+      ? `/uploads/${files.registrationCard[0].filename}`
+      : existingVehicle.registrationCard;
+    const insurance = files?.insurance?.[0]?.filename
+      ? `/uploads/${files.insurance[0].filename}`
+      : existingVehicle.insurance;
+    const technicalVisit = files?.technicalVisit?.[0]?.filename
+      ? `/uploads/${files.technicalVisit[0].filename}`
+      : existingVehicle.technicalVisit;
+    const authorization = files?.authorization?.[0]?.filename
+      ? `/uploads/${files.authorization[0].filename}`
+      : existingVehicle.authorization;
+    const taxSticker = files?.taxSticker?.[0]?.filename
+      ? `/uploads/${files.taxSticker[0].filename}`
+      : existingVehicle.taxSticker;
+
+    // Perform update
     const updatedVehicle = await prismaClient.vehicle.update({
-      where: { id: userId },
-      data: validatedData, // Use validated data for updating
+      where: { id: vehicleId },
+      data: {
+        ...validatedData,
+        image,
+        registrationCard,
+        insurance,
+        technicalVisit,
+        authorization,
+        taxSticker,
+      },
     });
 
-    // Send the updated vehicle as the response
-    res.status(200).json({ message: 'Vehicle updated successfully', updatedVehicle });
-  } catch (error) {
-    if (error instanceof z.ZodError) {
-      // Handle Zod validation errors
-      res.status(400).json({ message: 'Invalid vehicle data', errors: error.errors });
-      return;
-    }
+    res.status(200).json({ message: 'Vehicle updated successfully', vehicle: updatedVehicle });
 
-    // Handle other errors
-    console.error(error);
-    res.status(500).json({ message: 'Internal server error' });
+  } catch (error) {
+    console.error('Update vehicle error:', error);
+
+    if (error instanceof z.ZodError) {
+      res.status(400).json({
+        message: 'Invalid vehicle data',
+        errors: error.errors,
+      });
+    } else {
+      res.status(500).json({
+        message: 'Internal server error',
+        error: error instanceof Error ? error.message : 'Unknown error',
+      });
+    }
   }
 };
+
 /**
  * @desc GET all vehicles with related data
  * @route GET /api/vehicles
@@ -130,7 +203,6 @@ export const getAllVehicles = async (req: Request, res: Response): Promise<void>
     const vehicles = await prismaClient.vehicle.findMany({
       include: {
         reservations: true, // Include related reservations
-        rentals: true,      // Include related rentals
         contracts: true,    // Include related contracts
         infractions: true,  // Include related infractions
       },
@@ -165,7 +237,6 @@ export const getVehicle = async (req: Request, res: Response): Promise<void> => 
       },
       include: {
         reservations: true, // Include related reservations
-        rentals: true,      // Include related rentals
         contracts: true,    // Include related contracts
         infractions: true,  // Include related infractions
       },
@@ -216,9 +287,7 @@ export const deleteVehicle = async (req: Request, res: Response): Promise<void> 
     await prismaClient.reservation.deleteMany({
       where: { vehicleId: vehicle?.id },
     });
-    await prismaClient.rental.deleteMany({
-      where: { vehicleId: vehicle?.id },
-    });
+  
     await prismaClient.contract.deleteMany({
       where: { vehicleId: vehicle?.id },
     });
@@ -241,7 +310,73 @@ export const deleteVehicle = async (req: Request, res: Response): Promise<void> 
   }
 };
 
+/**
+ * @desc Get available vehicles for a given date range
+ * @route GET /api/vehicles/available
+ * @method GET
+ * @access protected
+ */
+export const getAvailableVehicles = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { startDate, endDate } = req.query;
+
+    // Validate query parameters
+    if (!startDate || !endDate) {
+      res.status(400).json({ message: 'startDate and endDate are required' });
+      return;
+    }
+
+    // Parse and validate dates
+    const start = new Date(startDate as string);
+    const end = new Date(endDate as string);
+
+    if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+      res.status(400).json({ message: 'Invalid date format' });
+      return;
+    }
+
+    if (start >= end) {
+      res.status(400).json({ message: 'startDate must be before endDate' });
+      return;
+    }
+
+    // Fetch vehicles with status AVAILABLE and no conflicting reservations
+    const availableVehicles = await prismaClient.vehicle.findMany({
+      where: {
+        status: 'AVAILABLE',
+        reservations: {
+          none: {
+            OR: [
+              {
+                startDate: { lte: end },
+                endDate: { gte: start },
+              },
+            ],
+            status: { in: ['PENDING', 'CONFIRMED'] },
+          },
+        },
+      },
+    });
+
+    res.status(200).json({
+      message: 'Available vehicles retrieved successfully',
+      vehicles: availableVehicles,
+    });
+  } catch (error) {
+    console.error('Error fetching available vehicles:', error);
+    res.status(500).json({
+      message: 'Internal server error',
+      error: error instanceof Error ? error.message : 'Unknown error',
+    });
+  }
+};
+
+
+
+
 // For the router setup, use this approach
 export const createVehicleHandler: RequestHandler = (req, res, next) => {
   createVehicle(req, res).catch(next);
 };
+
+

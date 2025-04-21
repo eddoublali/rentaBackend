@@ -9,6 +9,7 @@ import contracRouter from "./contract";
 import invoiceRouter from "./invoice";
 import infractionRouter from "./infraction";
 import expenseRouter from "./expense";
+import revenueRouter from "./revenue";
 
 
 // craete root router to combine all the routes
@@ -19,11 +20,12 @@ rootRouter.use('/auth',authRouter)
 rootRouter.use('/vehicle',vehicleRouter)
 rootRouter.use('/client',clientRouter)
 rootRouter.use('/user',userRouter)
-rootRouter.use('/reservation',reservationRouter)
+rootRouter.use('/reservations',reservationRouter)
 rootRouter.use('/document',documentRouter)
 rootRouter.use('/contrac',contracRouter)
 rootRouter.use('/invoice',invoiceRouter)
 rootRouter.use('/infraction',infractionRouter)
 rootRouter.use('/expense',expenseRouter)
+rootRouter.use('/revenue',revenueRouter)
 
 export default rootRouter;

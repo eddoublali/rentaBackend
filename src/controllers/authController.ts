@@ -17,9 +17,9 @@ export const signup = async (req: Request, res: Response) => {
   try {
     // Validate request body
     const validatedData = signupSchema.parse(req.body);
-    const { email, password, name } = validatedData;
+    const { email, password, name,role } = validatedData;
 
-    let user = await prismaClient.user.findFirst({ where: { email } });
+    let user = await prismaClient.user.findUnique({ where: { email } });
     if (user) {
       return res.status(400).json({ message: "Email already exists" });
     }
@@ -29,6 +29,8 @@ export const signup = async (req: Request, res: Response) => {
         email,
         name,
         password: hashSync(password, 10),
+        role,
+
       },
     });
 
@@ -64,7 +66,6 @@ export const login = async (req: Request, res: Response) => {
   const token = jwt.sign(
     { userId: user.id },
     JWT_SECRET,
-    { expiresIn: '24h' } // Token expires in 1 hour
   );
 
   res.status(200).json({ message: "User logged in successfully", token, user });

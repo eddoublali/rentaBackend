@@ -119,7 +119,7 @@ export const getAllInfractions = async (req: Request, res: Response): Promise<vo
     const infractions = await prismaClient.infraction.findMany();
     res.status(200).json({
       message: 'Infractions retrieved successfully',
-      data: infractions,
+      infractions,
     });
   } catch (error) {
     res.status(500).json({

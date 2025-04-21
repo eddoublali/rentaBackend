@@ -32,7 +32,7 @@ export const authMiddleware = async (
   try {
     
     const payload = jwt.verify(token, JWT_SECRET as string) as JwtPayload;
-    console.log('Payload:', payload);
+    // console.log('Payload:', payload);
 
     const user = await prismaClient.user.findUnique({
       where: { id: payload.userId }, // if payload.userId is undefined, it fails silently
@@ -43,7 +43,7 @@ export const authMiddleware = async (
     }
 
     req.user = user;
-    console.log('Authenticated user:', user);
+    // console.log('Authenticated user:', user);
     next();
   } catch (error) {
     console.error('Auth error:', error);

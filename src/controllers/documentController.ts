@@ -21,8 +21,13 @@ export const createDocument = async (req: Request, res: Response): Promise<void>
       res.status(404).json({ message: 'Client not found' });
       return;
     }
+    // 👇 Get uploaded image filename (if any)
+    const image = req.file ? req.file.filename : undefined;
 
-    const document = await prismaClient.document.create({ data });
+    const document = await prismaClient.document.create({ data: {
+      ...data,
+      image // only set if uploaded
+    }});
 
     res.status(201).json({
       message: 'Document created',
@@ -73,11 +78,18 @@ export const updateDocument = async (req: Request, res: Response): Promise<void>
       res.status(404).json({ message: 'Client not found' });
       return;
     }
+    // Get the uploaded image (if any), otherwise use the existing image
+    const newImage = req.file ? req.file.filename : existingDocument.image;
+
 
     const updatedDocument = await prismaClient.document.update({
       where: { id: documentId },
-      data,
+      data: {
+        ...data,
+        image: newImage, // Update the image if a new one is uploaded
+      },
     });
+
 
     res.status(200).json({
       message: 'Document updated',

@@ -34,29 +34,31 @@ model Client {
   name            String         // Nom complet ou nom de l'entreprise
   phone           String         // Numéro de téléphone
   email           String         @unique // Email
+  gender          Gender         @default(Male)
   cin             String         // Numéro de carte d'identité
   cinExpiry       DateTime?      // Date d'expiration de la carte d'identité
   license         String         // Permis de conduire ou licence d'entreprise
-  licenseExpiry  DateTime?      // Date d'expiration du permis de conduire ou
+  licenseExpiry   DateTime?      // Date d'expiration du permis de conduire ou
   address         String         // Adresse
   blacklisted     Boolean        @default(false) // Liste noire ?
-  nationality     String         // Nationalité
+  nationality     Nationality    @default(Moroccan)  // Nationalité
   passportNumber  String?        // Numéro de passeport
   passportExpiry  DateTime?      // Expiration du passeport
   birthDate       DateTime?      // Date de naissance (optional for enterprises)
   companyName     String?        // Nom de l'entreprise (si applicable)
   registrationNumber String?     // Numéro d'enregistrement de l'entreprise (si applicable)
   clientType      ClientType     @default(PERSONAL) // Type de client
-  
+  cinimage        String        // Image de la carte d'identité
+  licenseimage    String        // Image du permis de conduire
+
   // Relations
   documents       Document[]     // Documents liés
   reservations    Reservation[]  // Réservations faites en tant que client principal
   secondaryReservations Reservation[] @relation("SecondaryClient") // Réservations en tant que second conducteur
-  rentals         Rental[]       // Locations effectuées en tant que client
   contracts       Contract[]     // Contrats associés au client
   invoices        Invoice[]      // Factures associées au client
-  revenues         Revenue[]     // Revenus générés par le client
-
+  revenues        Revenue[]      // Revenus générés par le client
+ infractions  Infraction[]
 
   createdAt       DateTime       @default(now())
   updatedAt       DateTime       @updatedAt
@@ -66,23 +68,38 @@ enum ClientType {
   PERSONAL    // Client individuel
   ENTERPRISE  // Client entreprise
 }
+enum Nationality {
+  Moroccan
+  Algerian
+  Tunisian
+  French
+  Spanish
+  Italian
+  German
+  American
+  British
+  Canadian
+}
+enum Gender {
+  Male
+  Female
+}
 
 // Informations sur les véhicules
 model Vehicle {
   id              Int           @id @default(autoincrement())
-  brand           String        // Marque
+  brand           Brand         // Marque
   model           String        // Modèle
-  category        String?       // Catégorie
+  category        Category       // Catégorie
   plateNumber     String        @unique // Numéro d'immatriculation
   chassisNumber   String        @unique // Numéro de châssis
   year            Int           // Année de fabrication
-  color           String        // Couleur
+  color           Color         // Couleur
   doors           Int           // Nombre de portes
-  fuelType        String        // Type de carburant
-  gearbox         String        // Boîte de vitesse
+  fuelType        FuelType      // Type de carburant
+  gearbox         Gearbox       // Boîte de vitesse
   mileage         Int           // Kilométrage
   status          VehicleStatus @default(AVAILABLE) // Statut
-  type            VehicleType   @default(CAR) // Type de véhicule
   dailyPrice      Float         // Prix journalier
   image           String?       // Image du véhicule
   oilChange       DateTime?     // Date du dernier vidange
@@ -93,22 +110,20 @@ model Vehicle {
   remainingMonths Int?          // Mois restants
   monthlyPayment  Float?        // Paiement mensuel
   paymentDay      Int?          // Jour de paiement
-  registrationCard String?      // Carte grise
-  insurance        String?      // Assurance
-  technicalVisit   String?      // Visite technique
-  authorization    String?      // Autorisation
-  taxSticker       String?      // Vignette
+  registrationCard String?      // Carte grise image 
+  insurance       String?       // Assurance image
+  technicalVisit  String?       // Visite technique image
+  authorization   String?       // Autorisation image
+  taxSticker      String?       // Vignette image
   
   // Relations
-  reservations     Reservation[] // Réservations liées
-  rentals          Rental[]      // Locations liées
-  contracts        Contract[]    // Contrats liés
-  infractions      Infraction[]  // Infractions liées
-  revenues         Revenue[]     // Revenus générés par le véhicule
+  reservations    Reservation[] // Réservations liées
+  contracts       Contract[]    // Contrats liés
+  infractions     Infraction[]  // Infractions liées
+  revenues        Revenue[]     // Revenus générés par le véhicule
 
-
-  createdAt        DateTime     @default(now())
-  updatedAt        DateTime     @updatedAt
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
 }
 
 // Statut du véhicule
@@ -119,20 +134,66 @@ enum VehicleStatus {
 }
 
 // Type de véhicule
-enum VehicleType {
-  CAR             // Voiture
-  TRUCK           // Camion
-  MOTORCYCLE      // Moto
-  OTHER           // Autre
+// enum VehicleType {
+ //  CAR             // Voiture
+ //  TRUCK           // Camion
+//   MOTORCYCLE      // Moto
+ //  OTHER           // Autre
+// }
+enum FuelType {
+  GASOLINE
+  DIESEL
+  ELECTRIC
+  HYBRID
 }
-
+enum Brand {
+  TOYOTA
+  HONDA
+  FORD
+  MERCEDES
+  BMW
+  AUDI
+  VOLKSWAGEN
+  HYUNDAI
+  KIA
+  NISSAN
+  PEUGEOT
+  RENAULT
+  FIAT
+  VOLVO
+  MAZDA
+  JEEP
+  TESLA
+  SUZUKI
+  SKODA
+}
+enum Color {
+  BLACK
+  WHITE
+  GREY
+  BLUE
+  RED
+  GREEN
+  YELLOW
+  GOLD
+}
+enum Category {
+  CITADINE
+  BERLINE
+  SUV
+  UTILITAIRE
+}
+enum Gearbox {
+  MANUAL
+  AUTOMATIC
+}
 // Réservations
 model Reservation {
   id               Int               @id @default(autoincrement())
   vehicleId        Int
-  vehicle          Vehicle           @relation(fields: [vehicleId], references: [id])
+  vehicle          Vehicle           @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
   clientId         Int
-  client           Client            @relation(fields: [clientId], references: [id])
+  client           Client            @relation(fields: [clientId], references: [id], onDelete: Cascade)
   startDate        DateTime          // Date de début
   endDate          DateTime          // Date de fin
   totalAmount      Float             // Montant total
@@ -143,16 +204,18 @@ model Reservation {
   departureKm      Int               // Kilométrage de départ
   secondDriver     Boolean           @default(false) // Deuxième conducteur
   clientSeconId    Int?
-  secondClient     Client?           @relation("SecondaryClient", fields: [clientSeconId], references: [id])
+  secondClient     Client?           @relation("SecondaryClient", fields: [clientSeconId], references: [id], onDelete: Cascade)
   status           ReservationStatus @default(PENDING) // Statut
-  paymentMethod  PaymentMethod  // Mode de paiement
+  paymentMethod    PaymentMethod     // Mode de paiement
   paymentStatus    PaymentStatus     @default(PENDING) // Statut du paiement
-
+  Expirydate        String?        // Date d'expiration cheque
+  note            String?        @db.Text
+  accessories     Json?          // Changed from String[] to Json?
+  documents       Json?          // Changed from String[] to Json?
   // Relations
   invoices         Invoice[]         // Factures associées
-  revenues         Revenue[]     // Revenus générés par le reservation
+  revenues         Revenue[]         // Revenus générés par le reservation
 
-	
   createdAt        DateTime          @default(now())
   updatedAt        DateTime          @updatedAt
 }
@@ -164,7 +227,6 @@ enum ReservationStatus {
   COMPLETED
   CANCELED
 }
-
 
 // Statut d'un paiement
 enum PaymentStatus {
@@ -184,8 +246,8 @@ enum PaymentMethod {
 model Document {
   id             Int           @id @default(autoincrement())
   clientId       Int
-  client         Client        @relation(fields: [clientId], references: [id])
-  image          String?       //  Chemin ou URL de l'image liée au document
+  client         Client        @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  image          String?       // Chemin ou URL de l'image liée au document
   documentType   DocumentType  // Type de document
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt
@@ -205,9 +267,9 @@ enum DocumentType {
 model Contract {
   id             Int            @id @default(autoincrement())
   clientId       Int
-  client         Client         @relation(fields: [clientId], references: [id])
+  client         Client         @relation(fields: [clientId], references: [id], onDelete: Cascade)
   vehicleId      Int
-  vehicle        Vehicle        @relation(fields: [vehicleId], references: [id])
+  vehicle        Vehicle        @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
   startDate      DateTime
   endDate        DateTime
   totalAmount    Float
@@ -220,9 +282,9 @@ model Contract {
 model Invoice {
   id             Int            @id @default(autoincrement())
   reservationId  Int
-  reservation    Reservation    @relation(fields: [reservationId], references: [id])
+  reservation    Reservation    @relation(fields: [reservationId], references: [id], onDelete: Cascade)
   clientId       Int
-  client         Client         @relation(fields: [clientId], references: [id])
+  client         Client         @relation(fields: [clientId], references: [id], onDelete: Cascade)
   amount         Float          // Montant de la facture
   dueDate        DateTime       // Date d'échéance
   paymentStatus  PaymentStatus  @default(PENDING)
@@ -233,8 +295,10 @@ model Invoice {
 // Infractions liées aux véhicules
 model Infraction {
   id              Int              @id @default(autoincrement())
+  clientId  Int
+  client    Client  @relation(fields: [clientId], references: [id], onDelete: Cascade)
   vehicleId       Int
-  vehicle         Vehicle          @relation(fields: [vehicleId], references: [id])
+  vehicle         Vehicle          @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
   infractionType  String           // Type d'infraction
   fineAmount      Float            // Montant de l'amende
   infractionDate  DateTime         // Date de l'infraction
@@ -250,36 +314,22 @@ enum InfractionStatus {
   UNPAID
 }
 
-// Locations associées à un utilisateur (client)
-model Rental {
-  id        Int      @id @default(autoincrement())
- 
-  vehicleId Int
-  vehicle   Vehicle  @relation(fields: [vehicleId], references: [id])
-  clientId  Int
-  client    Client   @relation(fields: [clientId], references: [id])
-  startDate DateTime // Date de début
-  endDate   DateTime // Date de fin
-}
-
 // Revenus générés par l'entreprise
 model Revenue {
-  id             Int       @id @default(autoincrement())
-  title          String    // Titre ou description du revenu
-  clientId       Int       // ID du client associé
-  client         Client    @relation(fields: [clientId], references: [id])
-  reservationId  Int       // ID de la réservation associée
-  reservation    Reservation @relation(fields: [reservationId], references: [id])
-  vehicleId      Int       // ID du véhicule associé
-  vehicle        Vehicle   @relation(fields: [vehicleId], references: [id])
-
-  amount         Float     // Montant du revenu
-  source         String    // Source du revenu (réservation)
-  date           DateTime  // Date du revenu
-  notes          String?   // Remarques supplémentaires
-
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
+  id             Int            @id @default(autoincrement())
+  title          String         // Titre ou description du revenu
+  clientId       Int
+  client         Client         @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  reservationId  Int
+  reservation    Reservation    @relation(fields: [reservationId], references: [id], onDelete: Cascade)
+  vehicleId      Int
+  vehicle        Vehicle        @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+  amount         Float          // Montant du revenu
+  source         String         // Source du revenu (réservation)
+  date           DateTime       // Date du revenu
+  notes          String?        // Remarques supplémentaires
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
 }
 
 // Dépenses effectuées par l'entreprise
@@ -290,7 +340,6 @@ model Expense {
   category    String    // Catégorie (e.g. entretien, assurance, carburant)
   date        DateTime  // Date de la charge
   notes       String?   // Remarques supplémentaires
-
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 }

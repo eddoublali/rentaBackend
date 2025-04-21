@@ -6,6 +6,7 @@ import {
   adminMiddleware,
   isAdminOrAdministrateur,
 } from "../middleware/adminMiddleware";
+import { upload } from '../middleware/upload';
 
 
 const documentRouter: Router = Router();
@@ -15,12 +16,14 @@ documentRouter.post(
   "/",
   authMiddleware as RequestHandler,
   adminMiddleware,
+  upload.single("image"),
 createDocument
 );
 documentRouter.put(
   "/:id",
   authMiddleware as RequestHandler,
   adminMiddleware,
+  upload.single("image"),
   updateDocument
 );
 documentRouter.get(

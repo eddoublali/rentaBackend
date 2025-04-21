@@ -6,6 +6,7 @@ import {
   isAdminOrAdministrateur,
 } from "../middleware/adminMiddleware";
 import { createClient, deleteClient, getAllClients, getClientById, updateClient } from "../controllers/clientController";
+import { upload } from "../middleware/upload";
 
 const clientRouter: Router = Router();
 
@@ -14,13 +15,23 @@ clientRouter.post(
   "/",
   authMiddleware as RequestHandler,
   adminMiddleware,
-  createClient
+  upload.fields([
+    { name: 'cinimage', maxCount: 1 },
+    { name: 'licenseimage', maxCount: 1 },
+  ]),
+  createClient,
+
 );
 clientRouter.put(
   "/:id",
   authMiddleware as RequestHandler,
   adminMiddleware,
-  updateClient
+  upload.fields([
+    { name: 'cinimage', maxCount: 1 },
+    { name: 'licenseimage', maxCount: 1 },
+  ]),
+  updateClient,
+ 
 );
 clientRouter.get(
   "/",
