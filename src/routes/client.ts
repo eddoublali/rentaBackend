@@ -36,13 +36,13 @@ clientRouter.put(
 clientRouter.get(
   "/",
   authMiddleware as RequestHandler,
-  adminMiddleware,
+  isAdminOrAdministrateur,
   getAllClients
 );
 clientRouter.get(
   "/:id",
   authMiddleware as RequestHandler,
-  adminMiddleware,
+  isAdminOrAdministrateur,
   getClientById
 );
 clientRouter.delete(

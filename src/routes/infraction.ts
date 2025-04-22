@@ -26,13 +26,13 @@ infractionRouter.put(
 infractionRouter.get(
   "/",
   authMiddleware as RequestHandler,
-  adminMiddleware,
+  isAdminOrAdministrateur,
   getAllInfractions
 );
 infractionRouter.get(
   "/:id",
   authMiddleware as RequestHandler,
-  adminMiddleware,
+  isAdminOrAdministrateur,
   getOneInfraction
 );
 infractionRouter.delete(

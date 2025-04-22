@@ -116,7 +116,14 @@ export const updateInfraction = async (req: Request, res: Response): Promise<voi
  */
 export const getAllInfractions = async (req: Request, res: Response): Promise<void> => {
   try {
-    const infractions = await prismaClient.infraction.findMany();
+    const infractions = await prismaClient.infraction.findMany({
+      include: {
+        client: true,
+        vehicle: true
+      }
+    }
+     
+    );
     res.status(200).json({
       message: 'Infractions retrieved successfully',
       infractions,
@@ -145,6 +152,10 @@ export const getOneInfraction = async (req: Request, res: Response): Promise<voi
 
     const infraction = await prismaClient.infraction.findUnique({
       where: { id: Number(id) },
+      include:{
+        client: true,
+        vehicle: true
+      }
     });
 
     if (!infraction) {

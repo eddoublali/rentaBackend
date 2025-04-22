@@ -100,7 +100,7 @@ export const updateClient = async (req: Request, res: Response): Promise<void> =
         blacklisted: validatedClient.blacklisted
       },
     });
-    console.log(updatedClient)
+   
 
     res.status(200).json({ message: 'Client updated successfully', updatedClient });
   } catch (error) {
@@ -158,11 +158,12 @@ export const getClientById = async (req: Request, res: Response): Promise<void> 
       const client = await prismaClient.client.findUnique({
         where: { id: userId },
         include: {
-          documents: true, // Include related documents
+          documents: true, 
           infractions:true,
-          reservations: true, // Include main reservations
-          secondaryReservations: true, // Include secondary reservations          contracts: true, // Include contracts
-          invoices: true, // Include invoices
+          reservations: true, 
+          secondaryReservations: true,        
+          contracts: true, 
+          invoices: true, 
         },
       });
   

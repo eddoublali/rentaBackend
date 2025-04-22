@@ -7,7 +7,7 @@ const userRouter: Router = Router();
 
 // Public routes
 userRouter.get('/',  authMiddleware as RequestHandler,adminMiddleware,getAllUsers);
-userRouter.get('/:id',  authMiddleware as RequestHandler,adminMiddleware,getOneUser);
+userRouter.get('/:id',  authMiddleware as RequestHandler,getOneUser);
 userRouter.put('/:id',  authMiddleware as RequestHandler,adminMiddleware,updateUser);
 userRouter.delete('/:id',  authMiddleware as RequestHandler,adminMiddleware,deleteUser);
 
