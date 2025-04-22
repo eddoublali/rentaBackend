@@ -10,6 +10,7 @@ import invoiceRouter from "./invoice";
 import infractionRouter from "./infraction";
 import expenseRouter from "./expense";
 import revenueRouter from "./revenue";
+import AccidentRouter from "./accident";
 
 
 // craete root router to combine all the routes
@@ -27,5 +28,6 @@ rootRouter.use('/invoice',invoiceRouter)
 rootRouter.use('/infraction',infractionRouter)
 rootRouter.use('/expense',expenseRouter)
 rootRouter.use('/revenue',revenueRouter)
+rootRouter.use('/accident',AccidentRouter)
 
 export default rootRouter;

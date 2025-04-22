@@ -5,7 +5,7 @@ import {
   adminMiddleware,
   isAdminOrAdministrateur,
 } from "../middleware/adminMiddleware";
-import { getAllRevenues, getOneRevenue } from "../controllers/revenueController";
+import { getAllRevenues, getMonthlyRevenue, getOneRevenue } from "../controllers/revenueController";
 
 
 const revenueRouter: Router = Router();
@@ -18,6 +18,12 @@ revenueRouter.get(
   authMiddleware as RequestHandler,
   adminMiddleware,
   getAllRevenues
+);
+revenueRouter.get(
+  "/monthly",
+  authMiddleware as RequestHandler,
+  adminMiddleware,
+  getMonthlyRevenue
 );
 revenueRouter.get(
   "/:id",

@@ -121,19 +121,18 @@ export const updateClient = async (req: Request, res: Response): Promise<void> =
  */
 export const getAllClients = async (req: Request, res: Response): Promise<void> => {
     try {
-      // Fetch all clients from the database with related data
       const clients = await prismaClient.client.findMany({
         include: {
-          documents: true, // Include related documents
+          documents: true, 
           infractions:true,
-          reservations: true, // Include main reservations
-          secondaryReservations: true, // Include secondary reservations
-          contracts: true, // Include contracts
-          invoices: true, // Include invoices
+          reservations: true, 
+          secondaryReservations: true, 
+          contracts: true, 
+          invoices: true, 
+          accidents:true,
         },
       });
   
-      // Respond with the list of clients
       res.status(200).json({ message: 'Clients fetched successfully', clients });
     } catch (error) {
       console.error(error);
@@ -148,13 +147,13 @@ export const getAllClients = async (req: Request, res: Response): Promise<void> 
  */
 export const getClientById = async (req: Request, res: Response): Promise<void> => {
     try {
-      const { id } = req.params; // Get the client ID from the URL parameters
+      const { id } = req.params;
       const userId = Number(id);
       if (isNaN(userId)) {
          res.status(400).json({ message: 'Invalid Client ID' });
       }
   
-      // Fetch the client from the database by ID with related data
+      
       const client = await prismaClient.client.findUnique({
         where: { id: userId },
         include: {
@@ -164,6 +163,7 @@ export const getClientById = async (req: Request, res: Response): Promise<void> 
           secondaryReservations: true,        
           contracts: true, 
           invoices: true, 
+          accidents:true,
         },
       });
   
@@ -172,7 +172,6 @@ export const getClientById = async (req: Request, res: Response): Promise<void> 
         return;
       }
   
-      // Respond with the client data
       res.status(200).json({ message: 'Client fetched successfully', client });
     } catch (error) {
       console.error(error);
@@ -188,13 +187,12 @@ export const getClientById = async (req: Request, res: Response): Promise<void> 
  */
 export const deleteClient = async (req: Request, res: Response): Promise<void> => {
     try {
-      const { id } = req.params; // Get the client ID from the URL parameters
+      const { id } = req.params; 
       const userId = Number(id);
       if (isNaN(userId)) {
          res.status(400).json({ message: 'Invalid Client ID' });
       }
   
-      // Check if the client exists in the database
       const existingClient = await prismaClient.client.findUnique({
         where: { id: userId },
       });
@@ -204,12 +202,10 @@ export const deleteClient = async (req: Request, res: Response): Promise<void> =
         return;
       }
   
-      // Delete the client from the database
       await prismaClient.client.delete({
         where: { id: userId },
       });
   
-      // Respond with a success message
       res.status(200).json({ message: 'Client deleted successfully' });
     } catch (error) {
       console.error(error);

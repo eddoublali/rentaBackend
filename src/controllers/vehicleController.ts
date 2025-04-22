@@ -9,14 +9,11 @@ import { z } from 'zod';
  * @method POST
  * @access protected
  */
-// controllers/vehicleController.ts
 export const createVehicle = async (req: Request, res: Response): Promise<void> => {
   try {
     
-    // Validate the parsed data using Zod
     const validatedData = vehicleSchema.parse(req.body);
 
-    // Check for duplicate chassis number or plate number
     const existingVehicle = await prismaClient.vehicle.findFirst({
       where: {
         OR: [
@@ -33,7 +30,6 @@ export const createVehicle = async (req: Request, res: Response): Promise<void> 
       return;
     }
 
-    // Handle all file fields
     const files = req.files as { [fieldname: string]: Express.Multer.File[] };
     const image = files?.image ? `/uploads/${files.image[0].filename}` : null;
     const registrationCard = files?.registrationCard ? `/uploads/${files.registrationCard[0].filename}` : null;
@@ -42,7 +38,6 @@ export const createVehicle = async (req: Request, res: Response): Promise<void> 
     const authorization = files?.authorization ? `/uploads/${files.authorization[0].filename}` : null;
     const taxSticker = files?.taxSticker ? `/uploads/${files.taxSticker[0].filename}` : null;
 
-    // Create the vehicle in the database
     const vehicle = await prismaClient.vehicle.create({
       data: {
         ...validatedData,
@@ -71,14 +66,12 @@ export const createVehicle = async (req: Request, res: Response): Promise<void> 
         errors: error.errors
       });
     } else if (error.response) {
-      // Handle API errors
       res.status(error.response.status).json({
         status: 'error',
         message: error.response.data.message,
         errors: error.response.data.errors || ['Unknown server error']
       });
     } else {
-      // Handle other errors
       res.status(500).json({
         status: 'error',
         message: 'Internal server error',
@@ -103,10 +96,8 @@ export const updateVehicle = async (req: Request, res: Response): Promise<void> 
       return;
     }
 
-    // Validate request body
     const validatedData = vehicleUpdateSchema.parse(req.body);
 
-    // Find the vehicle
     const existingVehicle = await prismaClient.vehicle.findUnique({
       where: { id: vehicleId },
     });
@@ -116,7 +107,6 @@ export const updateVehicle = async (req: Request, res: Response): Promise<void> 
       return;
     }
 
-    // Check for chassis/plate number duplicates (excluding self)
     if (
       existingVehicle.chassisNumber !== validatedData.chassisNumber ||
       existingVehicle.plateNumber !== validatedData.plateNumber
@@ -139,7 +129,6 @@ export const updateVehicle = async (req: Request, res: Response): Promise<void> 
       }
     }
 
-    // Handle uploaded files
     const files = req.files as { [fieldname: string]: Express.Multer.File[] };
     const image = files?.image?.[0]?.filename ? `/uploads/${files.image[0].filename}` : existingVehicle.image;
     const registrationCard = files?.registrationCard?.[0]?.filename
@@ -158,7 +147,6 @@ export const updateVehicle = async (req: Request, res: Response): Promise<void> 
       ? `/uploads/${files.taxSticker[0].filename}`
       : existingVehicle.taxSticker;
 
-    // Perform update
     const updatedVehicle = await prismaClient.vehicle.update({
       where: { id: vehicleId },
       data: {
@@ -199,19 +187,17 @@ export const updateVehicle = async (req: Request, res: Response): Promise<void> 
  */
 export const getAllVehicles = async (req: Request, res: Response): Promise<void> => {
   try {
-    // Fetch all vehicles with related data
     const vehicles = await prismaClient.vehicle.findMany({
       include: {
-        reservations: true, // Include related reservations
-        contracts: true,    // Include related contracts
-        infractions: true,  // Include related infractions
+        reservations: true, 
+        contracts: true,    
+        infractions: true, 
+        accidents:true, 
       },
     });
 
-    // Send the vehicles as the response
     res.status(200).json({ message: 'Vehicles retrieved successfully', vehicles });
   } catch (error) {
-    // Handle errors
     console.error(error);
     res.status(500).json({ message: 'Internal server error' });
   }
@@ -225,25 +211,26 @@ export const getAllVehicles = async (req: Request, res: Response): Promise<void>
  */
 export const getVehicle = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { id } = req.params; // Get the vehicle ID from the URL parameters
+    const { id } = req.params; 
     const userId = Number(id);
     if (isNaN(userId)) {
        res.status(400).json({ message: 'Invalid Vehicle ID' });
     }
-    // Find the vehicle with the provided ID and include related data
+    
     const vehicle = await prismaClient.vehicle.findUnique({
       where: {
-        id: userId, // Convert the ID to a number
+        id: userId, 
       },
       include: {
-        reservations: true, // Include related reservations
-        contracts: true,    // Include related contracts
-        infractions: true,  // Include related infractions
+        reservations: true,
+        contracts: true,  
+        infractions: true,
+        accidents:true, 
       },
     });
 
     if (!vehicle) {
-      // If no vehicle is found, return a 404 error
+    
        res.status(404).json({ message: 'Vehicle not found' });
     }
 
