@@ -6,7 +6,6 @@ export const AccidentStatusEnum = z.enum(["REPORTED", "IN_PROGRESS", "REPAIRED",
 
 
 export const accidentSchema = z.object({
-  id: z.number().optional(), 
   vehicleId: z.number(),
   clientId: z.number().nullable().optional(),
 
