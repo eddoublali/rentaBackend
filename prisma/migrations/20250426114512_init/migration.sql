@@ -16,6 +16,7 @@ CREATE TABLE `User` (
 CREATE TABLE `Client` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `name` VARCHAR(191) NOT NULL,
+    `Lastname` VARCHAR(191) NOT NULL,
     `phone` VARCHAR(191) NOT NULL,
     `email` VARCHAR(191) NOT NULL,
     `gender` ENUM('Male', 'Female') NOT NULL DEFAULT 'Male',
@@ -86,33 +87,9 @@ CREATE TABLE `Reservation` (
     `clientId` INTEGER NOT NULL,
     `startDate` DATETIME(3) NOT NULL,
     `endDate` DATETIME(3) NOT NULL,
+    `dailyPrice` DOUBLE NOT NULL,
     `totalAmount` DOUBLE NOT NULL,
-    `deliveryLocation` VARCHAR(191) NOT NULL,
-    `returnLocation` VARCHAR(191) NOT NULL,
-    `additionalCharge` DOUBLE NULL,
-    `fuelLevel` INTEGER NOT NULL,
-    `departureKm` INTEGER NOT NULL,
-    `secondDriver` BOOLEAN NOT NULL DEFAULT false,
-    `clientSeconId` INTEGER NULL,
-    `status` ENUM('PENDING', 'CONFIRMED', 'COMPLETED', 'CANCELED') NOT NULL DEFAULT 'PENDING',
-    `paymentMethod` ENUM('CASH', 'CREDIT_CARD', 'BANK_TRANSFER') NOT NULL,
-    `paymentStatus` ENUM('PENDING', 'PAID', 'FAILED') NOT NULL DEFAULT 'PENDING',
-    `Expirydate` VARCHAR(191) NULL,
-    `note` TEXT NULL,
-    `accessories` JSON NULL,
-    `documents` JSON NULL,
-    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
-    `updatedAt` DATETIME(3) NOT NULL,
-
-    PRIMARY KEY (`id`)
-) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-
--- CreateTable
-CREATE TABLE `Document` (
-    `id` INTEGER NOT NULL AUTO_INCREMENT,
-    `clientId` INTEGER NOT NULL,
-    `image` VARCHAR(191) NULL,
-    `documentType` ENUM('CIN', 'PERMIT', 'PASSPORT', 'INSURANCE', 'BUSINESS_LICENSE', 'OTHERS') NOT NULL,
+    `status` ENUM('PENDING', 'CONFIRMED', 'CANCELED') NOT NULL DEFAULT 'PENDING',
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
 
@@ -122,12 +99,27 @@ CREATE TABLE `Document` (
 -- CreateTable
 CREATE TABLE `Contract` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
-    `clientId` INTEGER NOT NULL,
+    `reservationId` INTEGER NOT NULL,
     `vehicleId` INTEGER NOT NULL,
+    `clientId` INTEGER NOT NULL,
     `startDate` DATETIME(3) NOT NULL,
     `endDate` DATETIME(3) NOT NULL,
+    `deliveryDate` DATETIME(3) NOT NULL,
+    `returnDate` DATETIME(3) NOT NULL,
     `totalAmount` DOUBLE NOT NULL,
-    `paymentStatus` ENUM('PENDING', 'PAID', 'FAILED') NOT NULL DEFAULT 'PENDING',
+    `dailyPrice` DOUBLE NOT NULL,
+    `deliveryLocation` VARCHAR(191) NOT NULL,
+    `returnLocation` VARCHAR(191) NOT NULL,
+    `additionalCharge` DOUBLE NULL,
+    `fuelLevel` INTEGER NOT NULL,
+    `departureKm` INTEGER NOT NULL,
+    `secondDriver` BOOLEAN NOT NULL DEFAULT false,
+    `clientSeconId` INTEGER NULL,
+    `Expirydate` VARCHAR(191) NULL,
+    `paymentMethod` ENUM('CASH', 'CHECK', 'TRANSFER') NOT NULL,
+    `note` TEXT NULL,
+    `accessories` JSON NULL,
+    `documents` JSON NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
 
@@ -141,7 +133,6 @@ CREATE TABLE `Invoice` (
     `clientId` INTEGER NOT NULL,
     `amount` DOUBLE NOT NULL,
     `dueDate` DATETIME(3) NOT NULL,
-    `paymentStatus` ENUM('PENDING', 'PAID', 'FAILED') NOT NULL DEFAULT 'PENDING',
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
 
@@ -151,6 +142,7 @@ CREATE TABLE `Invoice` (
 -- CreateTable
 CREATE TABLE `Infraction` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `clientId` INTEGER NOT NULL,
     `vehicleId` INTEGER NOT NULL,
     `infractionType` VARCHAR(191) NOT NULL,
     `fineAmount` DOUBLE NOT NULL,
@@ -165,14 +157,12 @@ CREATE TABLE `Infraction` (
 -- CreateTable
 CREATE TABLE `Revenue` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
-    `title` VARCHAR(191) NOT NULL,
     `clientId` INTEGER NOT NULL,
-    `reservationId` INTEGER NOT NULL,
+    `contractId` INTEGER NOT NULL,
     `vehicleId` INTEGER NOT NULL,
     `amount` DOUBLE NOT NULL,
     `source` VARCHAR(191) NOT NULL,
     `date` DATETIME(3) NOT NULL,
-    `notes` VARCHAR(191) NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
 
@@ -182,11 +172,29 @@ CREATE TABLE `Revenue` (
 -- CreateTable
 CREATE TABLE `Expense` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `vehicleId` INTEGER NOT NULL,
     `title` VARCHAR(191) NOT NULL,
     `amount` DOUBLE NOT NULL,
     `category` VARCHAR(191) NOT NULL,
     `date` DATETIME(3) NOT NULL,
-    `notes` VARCHAR(191) NULL,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedAt` DATETIME(3) NOT NULL,
+
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `Accident` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `vehicleId` INTEGER NOT NULL,
+    `clientId` INTEGER NULL,
+    `accidentDate` DATETIME(3) NOT NULL,
+    `location` VARCHAR(191) NOT NULL,
+    `description` TEXT NULL,
+    `repairCost` DOUBLE NULL,
+    `fault` ENUM('CLIENT', 'THIRD_PARTY', 'UNKNOWN') NOT NULL DEFAULT 'UNKNOWN',
+    `damagePhotos` VARCHAR(191) NULL,
+    `status` ENUM('REPORTED', 'IN_PROGRESS', 'REPAIRED', 'CLOSED') NOT NULL DEFAULT 'REPORTED',
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
 
@@ -200,16 +208,16 @@ ALTER TABLE `Reservation` ADD CONSTRAINT `Reservation_vehicleId_fkey` FOREIGN KE
 ALTER TABLE `Reservation` ADD CONSTRAINT `Reservation_clientId_fkey` FOREIGN KEY (`clientId`) REFERENCES `Client`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `Reservation` ADD CONSTRAINT `Reservation_clientSeconId_fkey` FOREIGN KEY (`clientSeconId`) REFERENCES `Client`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `Contract` ADD CONSTRAINT `Contract_reservationId_fkey` FOREIGN KEY (`reservationId`) REFERENCES `Reservation`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `Document` ADD CONSTRAINT `Document_clientId_fkey` FOREIGN KEY (`clientId`) REFERENCES `Client`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `Contract` ADD CONSTRAINT `Contract_vehicleId_fkey` FOREIGN KEY (`vehicleId`) REFERENCES `Vehicle`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `Contract` ADD CONSTRAINT `Contract_clientId_fkey` FOREIGN KEY (`clientId`) REFERENCES `Client`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `Contract` ADD CONSTRAINT `Contract_vehicleId_fkey` FOREIGN KEY (`vehicleId`) REFERENCES `Vehicle`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `Contract` ADD CONSTRAINT `Contract_clientSeconId_fkey` FOREIGN KEY (`clientSeconId`) REFERENCES `Client`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `Invoice` ADD CONSTRAINT `Invoice_reservationId_fkey` FOREIGN KEY (`reservationId`) REFERENCES `Reservation`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
@@ -218,13 +226,25 @@ ALTER TABLE `Invoice` ADD CONSTRAINT `Invoice_reservationId_fkey` FOREIGN KEY (`
 ALTER TABLE `Invoice` ADD CONSTRAINT `Invoice_clientId_fkey` FOREIGN KEY (`clientId`) REFERENCES `Client`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE `Infraction` ADD CONSTRAINT `Infraction_clientId_fkey` FOREIGN KEY (`clientId`) REFERENCES `Client`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE `Infraction` ADD CONSTRAINT `Infraction_vehicleId_fkey` FOREIGN KEY (`vehicleId`) REFERENCES `Vehicle`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `Revenue` ADD CONSTRAINT `Revenue_clientId_fkey` FOREIGN KEY (`clientId`) REFERENCES `Client`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `Revenue` ADD CONSTRAINT `Revenue_reservationId_fkey` FOREIGN KEY (`reservationId`) REFERENCES `Reservation`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `Revenue` ADD CONSTRAINT `Revenue_contractId_fkey` FOREIGN KEY (`contractId`) REFERENCES `Contract`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `Revenue` ADD CONSTRAINT `Revenue_vehicleId_fkey` FOREIGN KEY (`vehicleId`) REFERENCES `Vehicle`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `Expense` ADD CONSTRAINT `Expense_vehicleId_fkey` FOREIGN KEY (`vehicleId`) REFERENCES `Vehicle`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `Accident` ADD CONSTRAINT `Accident_vehicleId_fkey` FOREIGN KEY (`vehicleId`) REFERENCES `Vehicle`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `Accident` ADD CONSTRAINT `Accident_clientId_fkey` FOREIGN KEY (`clientId`) REFERENCES `Client`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;

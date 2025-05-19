@@ -1,5 +1,3 @@
-// import { createAccident, deleteAllAccidents, deleteAccidentById, getAllAccidents, getOneAccident, updateAccident } from '../controllers/accidentController';
-
 import { Router, RequestHandler } from "express";
 import { authMiddleware } from "../middleware/authMiddleware"; 
 
@@ -7,8 +5,8 @@ import {
   adminMiddleware,
   isAdminOrAdministrateur,
 } from "../middleware/adminMiddleware";
-import { createAccident, deleteAccidentById, deleteAllAccidents, getAllAccidents, getOneAccident, updateAccident } from "../controllers/AccidentController";
 import { upload } from "../middleware/upload";
+import { createAccident, deleteAccidentById, deleteAllAccidents, getAllAccidents, getOneAccident, updateAccident } from "../controllers/accidentController";
 
 
 const AccidentRouter: Router = Router();
@@ -16,11 +14,11 @@ const AccidentRouter: Router = Router();
 AccidentRouter.post(
   "/",
   authMiddleware as RequestHandler,
-  adminMiddleware,
+  isAdminOrAdministrateur,
   upload.fields([
       { name: 'damagePhotos', maxCount: 1 },
     ]),
-  createAccident 
+    createAccident 
 );
 AccidentRouter.put(
   "/:id",
@@ -34,27 +32,26 @@ AccidentRouter.put(
 AccidentRouter.get(
   "/",
   authMiddleware as RequestHandler,
-  adminMiddleware,
   getAllAccidents 
 );
 AccidentRouter.get(
   "/:id",
   authMiddleware as RequestHandler,
-  adminMiddleware,
   getOneAccident 
 );
 AccidentRouter.delete(
   "/",
   authMiddleware as RequestHandler,
   adminMiddleware,
-  deleteAllAccidents 
+  deleteAllAccidents
+  
 
 );
 AccidentRouter.delete(
   "/:id",
   authMiddleware as RequestHandler,
   adminMiddleware,
-  deleteAccidentById 
+deleteAccidentById
 );
 
 export default AccidentRouter;

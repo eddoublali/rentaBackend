@@ -1,4 +1,4 @@
-import { createContract, deleteAllContracts, deleteContractById, getAllContracts, getOneContract, updateContract } from '../controllers/contractController';
+import { createContract, getAllContracts, deleteContract, getContractById, updateContract, } from '../controllers/contractController';
 
 import { Router, RequestHandler } from "express";
 import { authMiddleware } from "../middleware/authMiddleware"; // assuming it's a named export
@@ -15,7 +15,7 @@ const contracRouter: Router = Router();
 contracRouter.post(
   "/",
   authMiddleware as RequestHandler,
-  adminMiddleware,
+  isAdminOrAdministrateur,
   createContract
 );
 contracRouter.put(
@@ -27,26 +27,20 @@ contracRouter.put(
 contracRouter.get(
   "/",
   authMiddleware as RequestHandler,
-  adminMiddleware,
   getAllContracts
 );
 contracRouter.get(
   "/:id",
   authMiddleware as RequestHandler,
-  adminMiddleware,
-  getOneContract
+  isAdminOrAdministrateur,
+  getContractById
 );
-contracRouter.delete(
-  "/",
-  authMiddleware as RequestHandler,
-  adminMiddleware,
-  deleteAllContracts
-);
+
 contracRouter.delete(
   "/:id",
   authMiddleware as RequestHandler,
   adminMiddleware,
-  deleteContractById
+  deleteContract
 );
 
 export default contracRouter;

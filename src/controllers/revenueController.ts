@@ -15,7 +15,7 @@ export const getAllRevenues = async (req: Request, res: Response): Promise<void>
         const revenues = await prismaClient.revenue.findMany({
             include: {
                 client: true,
-                reservation: true,
+                contract: true,
                 vehicle: true
             }
         });
@@ -73,7 +73,7 @@ export const getMonthlyRevenue = async (req: Request, res: Response): Promise<vo
         const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
         // Calculate monthly totals
-        revenues.forEach(revenue => {
+        revenues.forEach((revenue: { createdAt: { getMonth: () => any; }; amount: any; }) => {
             const month = revenue.createdAt.getMonth(); // 0-11 (Jan-Dec)
             const monthName = monthNames[month];
             monthlyRevenue[monthName] += Number(revenue.amount);
@@ -114,13 +114,13 @@ export const getSpecificMonthRevenue = async (req: Request, res: Response): Prom
             },
             include: {
                 client: true,
-                reservation: true,
+                contract: true,
                 vehicle: true
             }
         });
 
         // Calculate total revenue for this month
-        const totalAmount = revenues.reduce((total, rev) => total + Number(rev.amount), 0);
+        const totalAmount = revenues.reduce((total: number, rev: { amount: any; }) => total + Number(rev.amount), 0);
 
         res.status(200).json({
             message: `Revenue for ${month}/${year} fetched successfully`,
@@ -150,7 +150,7 @@ export const getOneRevenue = async (req: Request, res: Response): Promise<void> 
             where: { id: revenueId },
             include: {
                 client: true,
-                reservation: true,
+                contract: true,
                 vehicle: true
             }
         });

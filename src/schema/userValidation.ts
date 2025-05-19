@@ -8,3 +8,12 @@ export const signupSchema=z.object({
 })
 
 
+export const requestPasswordResetSchema = z.object({
+    email: z.string().email()
+  });
+  
+  export const resetPasswordSchema = z.object({
+    token: z.string(),
+    password: z.string().min(6)
+  });
+  

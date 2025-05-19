@@ -20,7 +20,7 @@ const vehicleRouter: Router = Router();
 vehicleRouter.post(
   "/",
   authMiddleware as RequestHandler,
-  adminMiddleware,
+  isAdminOrAdministrateur,
   upload.fields([
     { name: 'image', maxCount: 1 },
     { name: 'registrationCard', maxCount: 1 },
@@ -34,7 +34,7 @@ vehicleRouter.post(
 vehicleRouter.get(
   "/",
   authMiddleware as RequestHandler,
-  isAdminOrAdministrateur,
+
 
   getAllVehicles
 );
@@ -49,7 +49,7 @@ vehicleRouter.get(
 vehicleRouter.get(
   "/:id",
   authMiddleware as RequestHandler,
-  isAdminOrAdministrateur,
+
   getVehicle
 );
 vehicleRouter.put(

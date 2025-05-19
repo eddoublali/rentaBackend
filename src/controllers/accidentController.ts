@@ -1,85 +1,114 @@
 import { Request, Response } from 'express';
 import { prismaClient } from '../app';
-import { accidentSchema, accidentUpdateSchema } from './../schema/accidentValidation';
+import { accidentSchema, accidentUpdateSchema, AccidentStatusEnum, FaultTypeEnum } from '../schema/accidentValidation';
 import { ZodError } from 'zod';
+
+// Types for better type safety
+type AccidentRequestFiles = { damagePhotos?: Express.Multer.File[] };
+type ApiResponse<T = any> = {
+  success: boolean;
+  message: string;
+  data?: T;
+  errors?: any;
+  count?: number;
+};
+
+// Helper functions to reduce code duplication
+const sendResponse = <T>(res: Response, status: number, response: ApiResponse<T>): void => {
+  res.status(status).json(response);
+};
+
+const handleError = (res: Response, error: unknown): void => {
+  console.error('Accident operation error:', error);
+  
+  if (error instanceof ZodError) {
+    sendResponse(res, 400, {
+      success: false,
+      message: 'Validation error',
+      errors: error.errors,
+    });
+    return;
+  }
+  
+  sendResponse(res, 500, {
+    success: false,
+    message: 'Operation failed',
+    errors: error instanceof Error ? error.message : 'Unknown error',
+  });
+};
+
+const processDamagePhotos = (files: AccidentRequestFiles | undefined, inputPhotos?: string | string[] | null): string | null => {
+  // Case 1: New photos uploaded
+  if (files?.damagePhotos && files.damagePhotos.length > 0) {
+    const photosPaths = files.damagePhotos.map(file => `/uploads/${file.filename}`);
+    return JSON.stringify(photosPaths);
+  }
+  
+  // Case 2: Photos passed in request body
+  if (inputPhotos) {
+    if (typeof inputPhotos === 'string') {
+      // Either already JSON string or single photo path
+      try {
+        // Check if it's a valid JSON
+        JSON.parse(inputPhotos);
+        return inputPhotos;
+      } catch {
+        // Not valid JSON, treat as single photo path
+        return JSON.stringify([inputPhotos]);
+      }
+    }
+    // Array of photos
+    return JSON.stringify(inputPhotos);
+  }
+  
+  // Case 3: No photos
+  return null;
+};
 
 /**
  * @desc Create a new accident
  * @route POST /api/accidents
- * @method POST
  * @access protected
  */
 export const createAccident = async (req: Request, res: Response): Promise<void> => {
   try {
     const validatedData = accidentSchema.parse(req.body);
-    
-    // Handle damage photo uploads
-    const files = req.files as { [fieldname: string]: Express.Multer.File[] };
-    
-    // Convert array of photo paths to JSON string to store in database
-    let photosJson: string | null = null;
-    if (files?.damagePhotos && files.damagePhotos.length > 0) {
-      const photosPaths = files.damagePhotos.map(file => `/uploads/${file.filename}`);
-      photosJson = JSON.stringify(photosPaths);
-    } else if (validatedData.damagePhotos) {
-      // If client sent photos as string, use that
-      photosJson = typeof validatedData.damagePhotos === 'string' 
-        ? validatedData.damagePhotos 
-        : JSON.stringify(validatedData.damagePhotos);
-    }
+    const photosJson = processDamagePhotos(req.files as AccidentRequestFiles, validatedData.damagePhotos);
 
     const accident = await prismaClient.accident.create({
       data: {
         vehicleId: validatedData.vehicleId,
-        clientId: validatedData.clientId,
+        clientId: validatedData.clientId ?? null,
         accidentDate: new Date(validatedData.accidentDate),
         location: validatedData.location,
         description: validatedData.description,
         repairCost: validatedData.repairCost,
-        fault: validatedData.fault,
+        fault: validatedData.fault || 'UNKNOWN',
         damagePhotos: photosJson,
-        status: validatedData.status,
+        status: validatedData.status || 'REPORTED',
       },
     });
 
-    res.status(201).json({
+    sendResponse(res, 201, {
       success: true,
       message: 'Accident created successfully',
       data: accident,
     });
   } catch (error) {
-    if (error instanceof ZodError) {
-       res.status(400).json({
-        success: false,
-        message: 'Validation error',
-        errors: error.errors,
-      });
-      return;
-    }
-    
-    console.error('Create accident error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to create accident',
-      error: error instanceof Error ? error.message : 'Unknown error',
-    });
+    handleError(res, error);
   }
 };
 
 /**
  * @desc Update an accident by ID
  * @route PUT /api/accidents/:id
- * @method PUT
  * @access protected
  */
 export const updateAccident = async (req: Request, res: Response): Promise<void> => {
   try {
     const accidentId = parseInt(req.params.id);
     if (isNaN(accidentId)) {
-       res.status(400).json({
-        success: false,
-        message: 'Invalid accident ID',
-      });
+      sendResponse(res, 400, { success: false, message: 'Invalid accident ID' });
       return;
     }
 
@@ -89,31 +118,15 @@ export const updateAccident = async (req: Request, res: Response): Promise<void>
     });
 
     if (!existingAccident) {
-       res.status(404).json({
-        success: false,
-        message: 'Accident not found',
-      });
+      sendResponse(res, 404, { success: false, message: 'Accident not found' });
       return;
     }
 
     const validatedData = accidentUpdateSchema.parse(req.body);
-    
-    // Handle damage photo uploads
-    const files = req.files as { [fieldname: string]: Express.Multer.File[] };
-    
-    // Determine what damagePhotos to use - Fix: Add null check
-    let photosJson: string | null = existingAccident?.damagePhotos || null;
-    
-    if (files?.damagePhotos && files.damagePhotos.length > 0) {
-      // New photos were uploaded, use these
-      const photosPaths = files.damagePhotos.map(file => `/uploads/${file.filename}`);
-      photosJson = JSON.stringify(photosPaths);
-    } else if (validatedData.damagePhotos !== undefined) {
-      // Client sent photos in request body
-      photosJson = typeof validatedData.damagePhotos === 'string'
-        ? validatedData.damagePhotos
-        : validatedData.damagePhotos ? JSON.stringify(validatedData.damagePhotos) : null;
-    }
+    const photosJson = processDamagePhotos(
+      req.files as AccidentRequestFiles, 
+      validatedData.damagePhotos ?? existingAccident.damagePhotos
+    );
 
     const updatedAccident = await prismaClient.accident.update({
       where: { id: accidentId },
@@ -130,34 +143,19 @@ export const updateAccident = async (req: Request, res: Response): Promise<void>
       },
     });
 
-    res.status(200).json({
+    sendResponse(res, 200, {
       success: true,
       message: 'Accident updated successfully',
       data: updatedAccident,
     });
   } catch (error) {
-    if (error instanceof ZodError) {
-       res.status(400).json({
-        success: false,
-        message: 'Validation error',
-        errors: error.errors,
-      });
-      return;
-    }
-    
-    console.error('Update accident error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to update accident',
-      error: error instanceof Error ? error.message : 'Unknown error',
-    });
+    handleError(res, error);
   }
 };
 
 /**
  * @desc Get all accidents
  * @route GET /api/accidents
- * @method GET
  * @access protected
  */
 export const getAllAccidents = async (_req: Request, res: Response): Promise<void> => {
@@ -175,35 +173,27 @@ export const getAllAccidents = async (_req: Request, res: Response): Promise<voi
       damagePhotos: accident.damagePhotos ? JSON.parse(accident.damagePhotos) : null
     }));
 
-    res.status(200).json({
-      success: true,
-      count: accidents.length,
-      data: formattedAccidents,
+    sendResponse(res, 200, {
+        success: true,
+        count: accidents.length,
+        data: formattedAccidents,
+        message: ''
     });
   } catch (error) {
-    console.error('Get all accidents error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to retrieve accidents',
-      error: error instanceof Error ? error.message : 'Unknown error',
-    });
+    handleError(res, error);
   }
 };
 
 /**
  * @desc Get a single accident by ID
  * @route GET /api/accidents/:id
- * @method GET
  * @access protected
  */
 export const getOneAccident = async (req: Request, res: Response): Promise<void> => {
   try {
     const accidentId = parseInt(req.params.id);
     if (isNaN(accidentId)) {
-       res.status(400).json({
-        success: false,
-        message: 'Invalid accident ID',
-      });
+      sendResponse(res, 400, { success: false, message: 'Invalid accident ID' });
       return;
     }
 
@@ -216,72 +206,36 @@ export const getOneAccident = async (req: Request, res: Response): Promise<void>
     });
 
     if (!accident) {
-       res.status(404).json({
-        success: false,
-        message: 'Accident not found',
-      });
+      sendResponse(res, 404, { success: false, message: 'Accident not found' });
       return;
     }
 
     // Parse damage photos JSON string to array for frontend use
-    // Fix: Only access properties after confirming accident is not null
     const formattedAccident = {
       ...accident,
-      damagePhotos: accident?.damagePhotos ? JSON.parse(accident.damagePhotos) : null
+      damagePhotos: accident.damagePhotos ? JSON.parse(accident.damagePhotos) : null
     };
 
-    res.status(200).json({
-      success: true,
-      data: formattedAccident,
+    sendResponse(res, 200, {
+        success: true,
+        data: formattedAccident,
+        message: ''
     });
   } catch (error) {
-    console.error('Get accident error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to retrieve accident',
-      error: error instanceof Error ? error.message : 'Unknown error',
-    });
-  }
-};
-
-/**
- * @desc Delete all accidents
- * @route DELETE /api/accidents
- * @method DELETE
- * @access protected
- */
-export const deleteAllAccidents = async (_req: Request, res: Response): Promise<void> => {
-  try {
-    await prismaClient.accident.deleteMany({});
-
-    res.status(200).json({
-      success: true,
-      message: 'All accidents deleted successfully',
-    });
-  } catch (error) {
-    console.error('Delete all accidents error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to delete accidents',
-      error: error instanceof Error ? error.message : 'Unknown error',
-    });
+    handleError(res, error);
   }
 };
 
 /**
  * @desc Delete an accident by ID
  * @route DELETE /api/accidents/:id
- * @method DELETE
  * @access protected
  */
 export const deleteAccidentById = async (req: Request, res: Response): Promise<void> => {
   try {
     const accidentId = parseInt(req.params.id);
     if (isNaN(accidentId)) {
-       res.status(400).json({
-        success: false,
-        message: 'Invalid accident ID',
-      });
+      sendResponse(res, 400, { success: false, message: 'Invalid accident ID' });
       return;
     }
 
@@ -291,10 +245,7 @@ export const deleteAccidentById = async (req: Request, res: Response): Promise<v
     });
 
     if (!existingAccident) {
-       res.status(404).json({
-        success: false,
-        message: 'Accident not found',
-      });
+      sendResponse(res, 404, { success: false, message: 'Accident not found' });
       return;
     }
 
@@ -302,16 +253,28 @@ export const deleteAccidentById = async (req: Request, res: Response): Promise<v
       where: { id: accidentId },
     });
 
-    res.status(200).json({
+    sendResponse(res, 200, {
       success: true,
       message: 'Accident deleted successfully',
     });
   } catch (error) {
-    console.error('Delete accident error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to delete accident',
-      error: error instanceof Error ? error.message : 'Unknown error',
+    handleError(res, error);
+  }
+};
+
+/**
+ * @desc Delete all accidents
+ * @route DELETE /api/accidents
+ * @access protected - Requires admin permissions
+ */
+export const deleteAllAccidents = async (_req: Request, res: Response): Promise<void> => {
+  try {
+    await prismaClient.accident.deleteMany({});
+    sendResponse(res, 200, {
+      success: true,
+      message: 'All accidents deleted successfully',
     });
+  } catch (error) {
+    handleError(res, error);
   }
 };

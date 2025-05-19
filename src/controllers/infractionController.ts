@@ -235,3 +235,37 @@ export const deleteAllInfractions = async (req: Request, res: Response): Promise
       });
     }
   };
+/**
+ * @desc Get all infractions related to a specific client
+ * @route GET /api/infraction/client/:clientId
+ * @method GET
+ * @access public
+ */
+export const getInfractionsByClient = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { clientId } = req.params;
+    const id = Number(clientId);
+
+    if (!id) {
+      res.status(400).json({ message: 'Invalid client ID' });
+      return;
+    }
+
+    const infractions = await prismaClient.infraction.findMany({
+      where: { clientId: id },
+      include: {
+        client: true,
+        vehicle: true,
+      },
+    });
+
+    res.status(200).json({
+      message: `Infractions for client ${id} retrieved successfully`,
+      data: infractions,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: 'Something went wrong',
+    });
+  }
+};

@@ -6,9 +6,9 @@ import { adminMiddleware } from "../middleware/adminMiddleware";
 const userRouter: Router = Router();
 
 // Public routes
-userRouter.get('/',  authMiddleware as RequestHandler,adminMiddleware,getAllUsers);
+userRouter.get('/',  authMiddleware as RequestHandler,getAllUsers);
 userRouter.get('/:id',  authMiddleware as RequestHandler,getOneUser);
-userRouter.put('/:id',  authMiddleware as RequestHandler,adminMiddleware,updateUser);
+userRouter.put('/:id',  authMiddleware as RequestHandler,updateUser);
 userRouter.delete('/:id',  authMiddleware as RequestHandler,adminMiddleware,deleteUser);
 
 

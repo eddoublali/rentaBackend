@@ -2,6 +2,7 @@ import { z } from 'zod';
 
 export const clientSchema = z.object({
   name: z.string().min(1, 'Name is required'),
+  Lastname: z.string().min(1, 'Name is required'),
   email: z.string().email('Invalid email format'),
   phone: z.string().min(1, 'Phone number is required'),
   gender: z.enum(['Male', 'Female'], { message: 'Invalid gender' }),
@@ -16,7 +17,7 @@ export const clientSchema = z.object({
     .string()
     .datetime()
     .transform(str => new Date(str)),
-  blacklisted: z.coerce.boolean(),
+  blacklisted: z.coerce.boolean().default(false),
   nationality: z.enum([
     'Moroccan',
     'Algerian',

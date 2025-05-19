@@ -12,7 +12,11 @@ import { z } from 'zod';
 export const createClient = async (req: Request, res: Response): Promise<void> => {
   try {
     const validatedClient = clientSchema.parse(req.body);
-
+console.log(validatedClient);
+    if (req.body.blacklisted) {
+      // Parse the string to boolean
+      req.body.blacklisted = req.body.blacklisted === 'true' || req.body.blacklisted === '1';
+    }
     const existingClient = await prismaClient.client.findUnique({
       where: { email: validatedClient.email },
     });
@@ -33,6 +37,7 @@ export const createClient = async (req: Request, res: Response): Promise<void> =
         licenseimage,
       },
     });
+    console.log(client);
 
     res.status(201).json({ message: 'Client created successfully', client });
   } catch (error) {
@@ -123,7 +128,6 @@ export const getAllClients = async (req: Request, res: Response): Promise<void> 
     try {
       const clients = await prismaClient.client.findMany({
         include: {
-          documents: true, 
           infractions:true,
           reservations: true, 
           secondaryReservations: true, 
@@ -157,7 +161,6 @@ export const getClientById = async (req: Request, res: Response): Promise<void> 
       const client = await prismaClient.client.findUnique({
         where: { id: userId },
         include: {
-          documents: true, 
           infractions:true,
           reservations: true, 
           secondaryReservations: true,        

@@ -14,7 +14,7 @@ const clientRouter: Router = Router();
 clientRouter.post(
   "/",
   authMiddleware as RequestHandler,
-  adminMiddleware,
+  isAdminOrAdministrateur,
   upload.fields([
     { name: 'cinimage', maxCount: 1 },
     { name: 'licenseimage', maxCount: 1 },

@@ -5,7 +5,7 @@ import {
   adminMiddleware,
   isAdminOrAdministrateur,
 } from "../middleware/adminMiddleware";
-import { createInfraction, deleteAllInfractions, deleteInfraction, getAllInfractions, getOneInfraction, updateInfraction } from "../controllers/infractionController";
+import { createInfraction, deleteAllInfractions, deleteInfraction, getAllInfractions, getInfractionsByClient, getOneInfraction, updateInfraction } from "../controllers/infractionController";
 
 
 const infractionRouter: Router = Router();
@@ -14,7 +14,7 @@ const infractionRouter: Router = Router();
 infractionRouter.post(
   "/",
   authMiddleware as RequestHandler,
-  adminMiddleware,
+  isAdminOrAdministrateur,
   createInfraction
 );
 infractionRouter.put(
@@ -26,7 +26,7 @@ infractionRouter.put(
 infractionRouter.get(
   "/",
   authMiddleware as RequestHandler,
-  isAdminOrAdministrateur,
+ 
   getAllInfractions
 );
 infractionRouter.get(
@@ -34,6 +34,12 @@ infractionRouter.get(
   authMiddleware as RequestHandler,
   isAdminOrAdministrateur,
   getOneInfraction
+);
+infractionRouter.get(
+  "/client/:clientId",
+  authMiddleware as RequestHandler,
+  isAdminOrAdministrateur,
+  getInfractionsByClient
 );
 infractionRouter.delete(
   "/",
