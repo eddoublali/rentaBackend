@@ -11,5 +11,13 @@
       "src": "/(.*)",
       "dest": "dist/app.js"
     }
-  ]
+  ],
+  "functions": {
+    "dist/app.js": {
+      "maxDuration": 30
+    }
+  },
+  "env": {
+    "NODE_ENV": "production"
+  }
 }

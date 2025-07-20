@@ -18,13 +18,16 @@ app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 app.use(express.json());
 
-app.use(
-  cors({
-    origin: "https://rentamanager.ma/", // Replace with your frontend URL
-    credentials: true, // If you're using cookies or auth headers
-  })
-);
-
+// Update your CORS configuration in src/app.ts
+app.use(cors({
+    origin: [
+        "https://rentamanager.ma",
+        "http://localhost:3000", // for local development
+        "http://localhost:5173", // if using Vite
+        "https://your-hostinger-domain.com" // replace with your actual domain
+    ],
+    credentials: true,
+}));
 // root router
 app.use("/api", rootRouter);
 console.log("Maintenance routes mounted at /api/maintenance");
