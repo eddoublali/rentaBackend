@@ -15,7 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.authMiddleware = void 0;
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const secrets_1 = require("../secrets");
-const app_1 = require("../app");
+const app_1 = require("..");
 const authMiddleware = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const authHeader = req.headers.authorization;
     const token = (authHeader === null || authHeader === void 0 ? void 0 : authHeader.startsWith('Bearer '))

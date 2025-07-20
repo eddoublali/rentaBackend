@@ -10,7 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteUser = exports.updateUser = exports.getOneUser = exports.getAllUsers = void 0;
-const app_1 = require("../app");
+const app_1 = require("..");
 const bcrypt_1 = require("bcrypt");
 /**
  * @desc Get all users

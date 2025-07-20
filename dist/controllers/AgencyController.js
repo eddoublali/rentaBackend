@@ -10,7 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteAgency = exports.getAgency = exports.updateAgency = exports.createAgency = void 0;
-const app_1 = require("../app");
+const app_1 = require("..");
 const agencyValidation_1 = require("../schema/agencyValidation");
 const zod_1 = require("zod");
 /**

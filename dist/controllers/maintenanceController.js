@@ -11,7 +11,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteMaintenance = exports.getOneMaintenance = exports.getAllMaintenances = exports.updateMaintenance = exports.createMaintenance = void 0;
 const maintenanceSchema_1 = require("./../schema/maintenanceSchema");
-const app_1 = require("../app");
+const app_1 = require("..");
 const zod_1 = require("zod");
 /**
  * @desc Create a new Maintenance

@@ -11,7 +11,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteAllInvoices = exports.deleteOneInvoice = exports.getOneInvoice = exports.getAllInvoices = exports.updateInvoice = exports.createInvoice = void 0;
 const invoiceValidation_1 = require("./../schema/invoiceValidation");
-const app_1 = require("../app");
+const app_1 = require("..");
 const zod_1 = require("zod");
 /**
  * @desc Create a new invoice // Factures

@@ -1,6 +1,6 @@
 import { clientSchema,clientUpdateSchema} from './../schema/clientValidation'; 
 import { Request, Response } from 'express';
-import { prismaClient } from '../app';
+import { prismaClient } from '..';
 import { z } from 'zod';
 
 /**

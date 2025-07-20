@@ -3,7 +3,7 @@ import {
   reservationUpdateSchema,
 } from "./../schema/reservationValidation";
 import { Request, Response } from "express";
-import { prismaClient } from "../app";
+import { prismaClient } from "..";
 import { z } from "zod";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 

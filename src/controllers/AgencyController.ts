@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { prismaClient } from '../app';
+import { prismaClient } from '..';
 import { agencySchema, agencyUpdateSchema } from '../schema/agencyValidation';
 import { ZodError } from 'zod';
 

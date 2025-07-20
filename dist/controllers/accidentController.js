@@ -10,7 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteAllAccidents = exports.deleteAccidentById = exports.getOneAccident = exports.getAllAccidents = exports.updateAccident = exports.createAccident = void 0;
-const app_1 = require("../app");
+const app_1 = require("..");
 const accidentValidation_1 = require("../schema/accidentValidation");
 const zod_1 = require("zod");
 // Helper functions to reduce code duplication

@@ -11,7 +11,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteAllReservations = exports.deleteReservation = exports.getOneReservation = exports.getAllReservations = exports.updateReservation = exports.createReservation = void 0;
 const reservationValidation_1 = require("./../schema/reservationValidation");
-const app_1 = require("../app");
+const app_1 = require("..");
 const zod_1 = require("zod");
 const library_1 = require("@prisma/client/runtime/library");
 /**

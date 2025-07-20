@@ -11,7 +11,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteContract = exports.updateContract = exports.getContractById = exports.getAllContracts = exports.createContract = void 0;
 const zod_1 = require("zod");
-const app_1 = require("../app");
+const app_1 = require("..");
 const contractValidation_1 = require("../schema/contractValidation");
 /**
  * Create a new contract

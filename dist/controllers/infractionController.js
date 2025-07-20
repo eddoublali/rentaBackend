@@ -11,7 +11,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getInfractionsByClient = exports.deleteAllInfractions = exports.deleteInfraction = exports.getOneInfraction = exports.getAllInfractions = exports.updateInfraction = exports.createInfraction = void 0;
 const infractiontValidation_1 = require("./../schema/infractiontValidation");
-const app_1 = require("../app");
+const app_1 = require("..");
 const zod_1 = require("zod");
 /**
  * @desc Create a new infraction

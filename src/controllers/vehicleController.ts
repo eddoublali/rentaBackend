@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction, RequestHandler } from 'express';
-import { prismaClient } from '../app';
+import { prismaClient } from '..';
 import { vehicleSchema, vehicleUpdateSchema } from '../schema/vehicleValidation';
 import { z } from 'zod';
 

@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { prismaClient } from '../app';
+import { prismaClient } from '..';
 import { accidentSchema, accidentUpdateSchema, AccidentStatusEnum, FaultTypeEnum } from '../schema/accidentValidation';
 import { ZodError } from 'zod';
 

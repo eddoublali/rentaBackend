@@ -11,7 +11,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteClient = exports.getClientById = exports.getAllClients = exports.updateClient = exports.createClient = void 0;
 const clientValidation_1 = require("./../schema/clientValidation");
-const app_1 = require("../app");
+const app_1 = require("..");
 const zod_1 = require("zod");
 /**
  * @desc Create a new client

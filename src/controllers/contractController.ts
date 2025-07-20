@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { z } from "zod";
-import { prismaClient } from "../app";
+import { prismaClient } from "..";
 import { contractSchema, contractUpdateSchema } from "../schema/contractValidation";
 
 interface CreateContractResponse {

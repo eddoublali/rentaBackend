@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import { JWT_SECRET } from '../secrets';
-import { prismaClient } from '../app';
+import { prismaClient } from '..';
 
 
 export const adminMiddleware = async (req: Request, res: Response, next: NextFunction) => {

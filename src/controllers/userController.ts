@@ -1,6 +1,6 @@
 
 import { Request, Response } from 'express';
-import { prismaClient } from '../app';
+import { prismaClient } from '..';
 import { hashSync } from 'bcrypt';
 
 /**

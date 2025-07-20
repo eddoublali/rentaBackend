@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { prismaClient } from '../app';
+import { prismaClient } from '..';
 
 // Define a type for the monthly revenue object
 type MonthlyRevenueMap = {

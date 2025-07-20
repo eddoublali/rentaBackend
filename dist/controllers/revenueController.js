@@ -10,7 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getOneRevenue = exports.getSpecificMonthRevenue = exports.getMonthlyRevenue = exports.getAllRevenues = void 0;
-const app_1 = require("../app");
+const app_1 = require("..");
 /**
  * @desc Get all revenues with monthly breakdown
  * @route GET /api/revenue/

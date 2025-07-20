@@ -1,7 +1,7 @@
 import { signupSchema } from '../schema/userValidation';
 import { z } from 'zod';
 import { Request, Response } from 'express';
-import { prismaClient } from '../app';
+import { prismaClient } from '..';
 import { hashSync, compareSync } from 'bcrypt';
 import * as jwt from 'jsonwebtoken';
 import { JWT_SECRET } from '../secrets';

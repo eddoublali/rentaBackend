@@ -45,7 +45,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.login = exports.signup = void 0;
 const userValidation_1 = require("../schema/userValidation");
 const zod_1 = require("zod");
-const app_1 = require("../app");
+const app_1 = require("..");
 const bcrypt_1 = require("bcrypt");
 const jwt = __importStar(require("jsonwebtoken"));
 const secrets_1 = require("../secrets");

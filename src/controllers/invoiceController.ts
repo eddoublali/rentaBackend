@@ -1,6 +1,6 @@
 import { invoiceUpdateSchema, invoiceSchema } from './../schema/invoiceValidation';
 import { Request, Response } from 'express';
-import { prismaClient } from '../app';
+import { prismaClient } from '..';
 import { z } from 'zod';
 
 /**
