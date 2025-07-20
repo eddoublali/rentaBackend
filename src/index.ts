@@ -6,6 +6,7 @@ import cors from "cors";
 import routes from "./routes";
 const { notFound, errorsHanlder } = require("./middleware/errors");
 import { setupPrismaMiddleware } from "./middleware/prismaMiddleware";
+import { createServer } from "http";
 
 const app = express();
 
@@ -50,4 +51,4 @@ if (process.env.NODE_ENV !== 'production') {
 }
 
 // Export for Vercel
-export default app;
+export default createServer(app);
