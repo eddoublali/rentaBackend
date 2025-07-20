@@ -4,17 +4,9 @@
     {
       "src": "dist/index.js",
       "use": "@vercel/node"
-    },
-    {
-      "src": "dist/ipa/index.js",
-      "use": "@vercel/node"
     }
   ],
   "routes": [
-    {
-      "src": "/ipa/(.*)",
-      "dest": "/dist/ipa/index.js"
-    },
     {
       "src": "/(.*)",
       "dest": "/dist/index.js"

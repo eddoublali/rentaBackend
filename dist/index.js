@@ -12,6 +12,7 @@ const cors_1 = __importDefault(require("cors"));
 const routes_1 = __importDefault(require("./routes"));
 const { notFound, errorsHanlder } = require("./middleware/errors");
 const prismaMiddleware_1 = require("./middleware/prismaMiddleware");
+const http_1 = require("http");
 const app = (0, express_1.default)();
 // Initialize Prisma client and apply middleware
 const prismaBase = new client_1.PrismaClient();
@@ -46,4 +47,4 @@ if (process.env.NODE_ENV !== 'production') {
     });
 }
 // Export for Vercel
-exports.default = app;
+exports.default = (0, http_1.createServer)(app);
