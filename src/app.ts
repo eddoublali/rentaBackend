@@ -20,7 +20,7 @@ app.use(express.json());
 
 app.use(
   cors({
-    origin: "http://localhost:5173", // Replace with your frontend URL
+    origin: "https://rentamanager.ma/", // Replace with your frontend URL
     credentials: true, // If you're using cookies or auth headers
   })
 );
