@@ -1,0 +1,35 @@
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const auth_1 = __importDefault(require("./auth"));
+const vehicle_1 = __importDefault(require("./vehicle"));
+const client_1 = __importDefault(require("./client"));
+const user_1 = __importDefault(require("./user"));
+const reservation_1 = __importDefault(require("./reservation"));
+const contract_1 = __importDefault(require("./contract"));
+const invoice_1 = __importDefault(require("./invoice"));
+const infraction_1 = __importDefault(require("./infraction"));
+const expense_1 = __importDefault(require("./expense"));
+const revenue_1 = __importDefault(require("./revenue"));
+const accident_1 = __importDefault(require("./accident"));
+const maintenance_1 = __importDefault(require("./maintenance"));
+const agency_1 = __importDefault(require("./agency"));
+// craete root router to combine all the routes
+const rootRouter = (0, express_1.Router)();
+rootRouter.use('/auth', auth_1.default);
+rootRouter.use('/vehicle', vehicle_1.default);
+rootRouter.use('/client', client_1.default);
+rootRouter.use('/user', user_1.default);
+rootRouter.use('/reservations', reservation_1.default);
+rootRouter.use('/contracts', contract_1.default);
+rootRouter.use('/invoice', invoice_1.default);
+rootRouter.use('/infraction', infraction_1.default);
+rootRouter.use('/expense', expense_1.default);
+rootRouter.use('/revenue', revenue_1.default);
+rootRouter.use('/accidents', accident_1.default);
+rootRouter.use('/maintenance', maintenance_1.default);
+rootRouter.use('/agencies', agency_1.default);
+exports.default = rootRouter;
