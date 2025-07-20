@@ -11,7 +11,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteAllInvoices = exports.deleteOneInvoice = exports.getOneInvoice = exports.getAllInvoices = exports.updateInvoice = exports.createInvoice = void 0;
 const invoiceValidation_1 = require("./../schema/invoiceValidation");
-const app_1 = require("..");
+const __1 = require("..");
 const zod_1 = require("zod");
 /**
  * @desc Create a new invoice // Factures
@@ -24,7 +24,7 @@ const createInvoice = (req, res) => __awaiter(void 0, void 0, void 0, function* 
         // Validate the request body with Zod
         const validatedInvoice = invoiceValidation_1.invoiceSchema.parse(req.body);
         // Check if the related reservation exists
-        const reservationExists = yield app_1.prismaClient.reservation.findUnique({
+        const reservationExists = yield __1.prismaClient.reservation.findUnique({
             where: { id: validatedInvoice.reservationId },
         });
         if (!reservationExists) {
@@ -32,7 +32,7 @@ const createInvoice = (req, res) => __awaiter(void 0, void 0, void 0, function* 
             return;
         }
         // Check if the related client exists
-        const clientExists = yield app_1.prismaClient.client.findUnique({
+        const clientExists = yield __1.prismaClient.client.findUnique({
             where: { id: validatedInvoice.clientId },
         });
         if (!clientExists) {
@@ -40,7 +40,7 @@ const createInvoice = (req, res) => __awaiter(void 0, void 0, void 0, function* 
             return;
         }
         // Create the new invoice in the database
-        const newInvoice = yield app_1.prismaClient.invoice.create({
+        const newInvoice = yield __1.prismaClient.invoice.create({
             data: validatedInvoice,
         });
         res.status(201).json({
@@ -88,7 +88,7 @@ const updateInvoice = (req, res) => __awaiter(void 0, void 0, void 0, function* 
             return;
         }
         // Check if the reservation exists
-        const reservationExists = yield app_1.prismaClient.reservation.findUnique({
+        const reservationExists = yield __1.prismaClient.reservation.findUnique({
             where: { id: reservationId },
         });
         if (!reservationExists) {
@@ -96,7 +96,7 @@ const updateInvoice = (req, res) => __awaiter(void 0, void 0, void 0, function* 
             return;
         }
         // Check if the client exists
-        const clientExists = yield app_1.prismaClient.client.findUnique({
+        const clientExists = yield __1.prismaClient.client.findUnique({
             where: { id: clientId },
         });
         if (!clientExists) {
@@ -104,7 +104,7 @@ const updateInvoice = (req, res) => __awaiter(void 0, void 0, void 0, function* 
             return;
         }
         // Check if the invoice exists
-        const invoiceExists = yield app_1.prismaClient.invoice.findUnique({
+        const invoiceExists = yield __1.prismaClient.invoice.findUnique({
             where: { id: Number(id) },
         });
         if (!invoiceExists) {
@@ -112,7 +112,7 @@ const updateInvoice = (req, res) => __awaiter(void 0, void 0, void 0, function* 
             return;
         }
         // Update the invoice in the database
-        const updatedInvoice = yield app_1.prismaClient.invoice.update({
+        const updatedInvoice = yield __1.prismaClient.invoice.update({
             where: { id: Number(id) },
             data: validatedInvoice,
         });
@@ -147,7 +147,7 @@ exports.updateInvoice = updateInvoice;
 const getAllInvoices = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         // Fetch all invoices from the database
-        const invoices = yield app_1.prismaClient.invoice.findMany({
+        const invoices = yield __1.prismaClient.invoice.findMany({
             include: {
                 reservation: true, // You can include related fields like reservation
                 client: true, // Include client if needed
@@ -183,7 +183,7 @@ const getOneInvoice = (req, res) => __awaiter(void 0, void 0, void 0, function* 
             res.status(400).json({ message: 'Invalid invoice id' });
         }
         // Fetch the invoice with the given ID
-        const invoice = yield app_1.prismaClient.invoice.findUnique({
+        const invoice = yield __1.prismaClient.invoice.findUnique({
             where: { id: Number(id) },
             include: {
                 reservation: true, // Include related reservation details
@@ -221,7 +221,7 @@ const deleteOneInvoice = (req, res) => __awaiter(void 0, void 0, void 0, functio
             return;
         }
         // Check if the invoice exists
-        const invoiceExists = yield app_1.prismaClient.invoice.findUnique({
+        const invoiceExists = yield __1.prismaClient.invoice.findUnique({
             where: { id: invoiceId },
         });
         if (!invoiceExists) {
@@ -229,7 +229,7 @@ const deleteOneInvoice = (req, res) => __awaiter(void 0, void 0, void 0, functio
             return;
         }
         // Delete the invoice with the given ID
-        const deletedInvoice = yield app_1.prismaClient.invoice.delete({
+        const deletedInvoice = yield __1.prismaClient.invoice.delete({
             where: { id: invoiceId },
         });
         res.status(200).json({
@@ -253,7 +253,7 @@ exports.deleteOneInvoice = deleteOneInvoice;
 const deleteAllInvoices = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         // Delete all invoices from the database
-        const deletedInvoices = yield app_1.prismaClient.invoice.deleteMany();
+        const deletedInvoices = yield __1.prismaClient.invoice.deleteMany();
         res.status(200).json({
             message: `${deletedInvoices.count} invoices deleted successfully`,
             data: deletedInvoices,

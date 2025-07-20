@@ -10,7 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.createVehicleHandler = exports.getAvailableVehicles = exports.deleteVehicle = exports.getVehicle = exports.getAllVehicles = exports.updateVehicle = exports.createVehicle = void 0;
-const app_1 = require("..");
+const __1 = require("..");
 const vehicleValidation_1 = require("../schema/vehicleValidation");
 const zod_1 = require("zod");
 /**
@@ -22,7 +22,7 @@ const zod_1 = require("zod");
 const createVehicle = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const validatedData = vehicleValidation_1.vehicleSchema.parse(req.body);
-        const existingVehicle = yield app_1.prismaClient.vehicle.findFirst({
+        const existingVehicle = yield __1.prismaClient.vehicle.findFirst({
             where: {
                 OR: [
                     { chassisNumber: validatedData.chassisNumber },
@@ -43,7 +43,7 @@ const createVehicle = (req, res) => __awaiter(void 0, void 0, void 0, function* 
         const technicalVisit = (files === null || files === void 0 ? void 0 : files.technicalVisit) ? `/uploads/${files.technicalVisit[0].filename}` : null;
         const authorization = (files === null || files === void 0 ? void 0 : files.authorization) ? `/uploads/${files.authorization[0].filename}` : null;
         const taxSticker = (files === null || files === void 0 ? void 0 : files.taxSticker) ? `/uploads/${files.taxSticker[0].filename}` : null;
-        const vehicle = yield app_1.prismaClient.vehicle.create({
+        const vehicle = yield __1.prismaClient.vehicle.create({
             data: Object.assign(Object.assign({}, validatedData), { image,
                 registrationCard,
                 insurance,
@@ -98,7 +98,7 @@ const updateVehicle = (req, res) => __awaiter(void 0, void 0, void 0, function* 
             return;
         }
         const validatedData = vehicleValidation_1.vehicleUpdateSchema.parse(req.body);
-        const existingVehicle = yield app_1.prismaClient.vehicle.findUnique({
+        const existingVehicle = yield __1.prismaClient.vehicle.findUnique({
             where: { id: vehicleId },
         });
         if (!existingVehicle) {
@@ -107,7 +107,7 @@ const updateVehicle = (req, res) => __awaiter(void 0, void 0, void 0, function* 
         }
         if (existingVehicle.chassisNumber !== validatedData.chassisNumber ||
             existingVehicle.plateNumber !== validatedData.plateNumber) {
-            const duplicateVehicle = yield app_1.prismaClient.vehicle.findFirst({
+            const duplicateVehicle = yield __1.prismaClient.vehicle.findFirst({
                 where: {
                     OR: [
                         { chassisNumber: validatedData.chassisNumber },
@@ -140,7 +140,7 @@ const updateVehicle = (req, res) => __awaiter(void 0, void 0, void 0, function* 
         const taxSticker = ((_m = (_l = files === null || files === void 0 ? void 0 : files.taxSticker) === null || _l === void 0 ? void 0 : _l[0]) === null || _m === void 0 ? void 0 : _m.filename)
             ? `/uploads/${files.taxSticker[0].filename}`
             : existingVehicle.taxSticker;
-        const updatedVehicle = yield app_1.prismaClient.vehicle.update({
+        const updatedVehicle = yield __1.prismaClient.vehicle.update({
             where: { id: vehicleId },
             data: Object.assign(Object.assign({}, validatedData), { image,
                 registrationCard,
@@ -176,7 +176,7 @@ exports.updateVehicle = updateVehicle;
  */
 const getAllVehicles = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const vehicles = yield app_1.prismaClient.vehicle.findMany({
+        const vehicles = yield __1.prismaClient.vehicle.findMany({
             include: {
                 reservations: true,
                 contracts: true,
@@ -205,7 +205,7 @@ const getVehicle = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
         if (isNaN(userId)) {
             res.status(400).json({ message: 'Invalid Vehicle ID' });
         }
-        const vehicle = yield app_1.prismaClient.vehicle.findUnique({
+        const vehicle = yield __1.prismaClient.vehicle.findUnique({
             where: {
                 id: userId,
             },
@@ -242,7 +242,7 @@ const deleteVehicle = (req, res) => __awaiter(void 0, void 0, void 0, function* 
             res.status(400).json({ message: 'Invalid Vehicle ID' });
         }
         // Find the vehicle with the provided ID
-        const vehicle = yield app_1.prismaClient.vehicle.findUnique({
+        const vehicle = yield __1.prismaClient.vehicle.findUnique({
             where: {
                 id: userId, // Convert the ID to a number
             },
@@ -253,17 +253,17 @@ const deleteVehicle = (req, res) => __awaiter(void 0, void 0, void 0, function* 
         }
         // Delete related data first, if necessary
         // Example: Delete related rentals, reservations, contracts, infractions, etc.
-        yield app_1.prismaClient.reservation.deleteMany({
+        yield __1.prismaClient.reservation.deleteMany({
             where: { vehicleId: vehicle === null || vehicle === void 0 ? void 0 : vehicle.id },
         });
-        yield app_1.prismaClient.contract.deleteMany({
+        yield __1.prismaClient.contract.deleteMany({
             where: { vehicleId: vehicle === null || vehicle === void 0 ? void 0 : vehicle.id },
         });
-        yield app_1.prismaClient.infraction.deleteMany({
+        yield __1.prismaClient.infraction.deleteMany({
             where: { vehicleId: vehicle === null || vehicle === void 0 ? void 0 : vehicle.id },
         });
         // Delete the vehicle
-        yield app_1.prismaClient.vehicle.delete({
+        yield __1.prismaClient.vehicle.delete({
             where: {
                 id: userId,
             },
@@ -303,7 +303,7 @@ const getAvailableVehicles = (req, res) => __awaiter(void 0, void 0, void 0, fun
             return;
         }
         // Fetch vehicles with status AVAILABLE and no conflicting reservations
-        const availableVehicles = yield app_1.prismaClient.vehicle.findMany({
+        const availableVehicles = yield __1.prismaClient.vehicle.findMany({
             where: {
                 status: 'AVAILABLE',
                 reservations: {

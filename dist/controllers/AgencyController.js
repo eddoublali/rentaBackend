@@ -10,7 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteAgency = exports.getAgency = exports.updateAgency = exports.createAgency = void 0;
-const app_1 = require("..");
+const __1 = require("..");
 const agencyValidation_1 = require("../schema/agencyValidation");
 const zod_1 = require("zod");
 /**
@@ -21,7 +21,7 @@ const zod_1 = require("zod");
 const createAgency = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     var _a, _b;
     try {
-        const existingAgency = yield app_1.prismaClient.agency.findUnique({ where: { id: 1 } });
+        const existingAgency = yield __1.prismaClient.agency.findUnique({ where: { id: 1 } });
         if (existingAgency) {
             res.status(400).json({
                 message: "Agency already exists. Use the update endpoint instead.",
@@ -30,7 +30,7 @@ const createAgency = (req, res) => __awaiter(void 0, void 0, void 0, function* (
         const validated = agencyValidation_1.agencySchema.parse(req.body);
         const files = req.files;
         const logo = ((_b = (_a = files === null || files === void 0 ? void 0 : files.logo) === null || _a === void 0 ? void 0 : _a[0]) === null || _b === void 0 ? void 0 : _b.filename) ? `/uploads/${files.logo[0].filename}` : null;
-        const agency = yield app_1.prismaClient.agency.create({
+        const agency = yield __1.prismaClient.agency.create({
             data: Object.assign(Object.assign({ id: 1 }, validated), { logo }),
         });
         res.status(201).json({ data: agency });
@@ -52,14 +52,14 @@ exports.createAgency = createAgency;
 const updateAgency = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     var _a, _b;
     try {
-        const agency = yield app_1.prismaClient.agency.findUnique({ where: { id: 1 } });
+        const agency = yield __1.prismaClient.agency.findUnique({ where: { id: 1 } });
         if (!agency) {
             res.status(404).json({ message: "Agency not found" });
         }
         const validated = agencyValidation_1.agencyUpdateSchema.parse(req.body);
         const files = req.files;
         const logo = ((_b = (_a = files === null || files === void 0 ? void 0 : files.logo) === null || _a === void 0 ? void 0 : _a[0]) === null || _b === void 0 ? void 0 : _b.filename) ? `/uploads/${files.logo[0].filename}` : (agency === null || agency === void 0 ? void 0 : agency.logo) || null;
-        const updatedAgency = yield app_1.prismaClient.agency.update({
+        const updatedAgency = yield __1.prismaClient.agency.update({
             where: { id: 1 },
             data: Object.assign(Object.assign({}, validated), { logo }),
         });
@@ -81,7 +81,7 @@ exports.updateAgency = updateAgency;
  */
 const getAgency = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const agency = yield app_1.prismaClient.agency.findUnique({ where: { id: 1 } });
+        const agency = yield __1.prismaClient.agency.findUnique({ where: { id: 1 } });
         if (!agency) {
             res.status(404).json({ message: "Agency not found" });
         }
@@ -104,11 +104,11 @@ const deleteAgency = (req, res) => __awaiter(void 0, void 0, void 0, function* (
         if (id !== '1') {
             res.status(400).json({ message: "Only agency with ID 1 can be deleted" });
         }
-        const agency = yield app_1.prismaClient.agency.findUnique({ where: { id: 1 } });
+        const agency = yield __1.prismaClient.agency.findUnique({ where: { id: 1 } });
         if (!agency) {
             res.status(404).json({ message: "Agency not found" });
         }
-        yield app_1.prismaClient.agency.delete({ where: { id: 1 } });
+        yield __1.prismaClient.agency.delete({ where: { id: 1 } });
         res.status(200).json({ message: "Agency deleted successfully" });
     }
     catch (error) {

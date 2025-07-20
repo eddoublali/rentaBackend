@@ -11,7 +11,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteAllReservations = exports.deleteReservation = exports.getOneReservation = exports.getAllReservations = exports.updateReservation = exports.createReservation = void 0;
 const reservationValidation_1 = require("./../schema/reservationValidation");
-const app_1 = require("..");
+const __1 = require("..");
 const zod_1 = require("zod");
 const library_1 = require("@prisma/client/runtime/library");
 /**
@@ -25,7 +25,7 @@ const createReservation = (req, res) => __awaiter(void 0, void 0, void 0, functi
         // Validate the request body using the reservationSchema
         const validatedReservation = reservationValidation_1.reservationSchema.parse(req.body);
         // Check if the vehicle exists
-        const vehicle = yield app_1.prismaClient.vehicle.findUnique({
+        const vehicle = yield __1.prismaClient.vehicle.findUnique({
             where: { id: validatedReservation.vehicleId },
         });
         if (!vehicle) {
@@ -38,7 +38,7 @@ const createReservation = (req, res) => __awaiter(void 0, void 0, void 0, functi
             return;
         }
         // Check if the client exists
-        const client = yield app_1.prismaClient.client.findUnique({
+        const client = yield __1.prismaClient.client.findUnique({
             where: { id: validatedReservation.clientId },
         });
         if (!client) {
@@ -46,7 +46,7 @@ const createReservation = (req, res) => __awaiter(void 0, void 0, void 0, functi
             return;
         }
         // Check if the vehicle is already reserved during the requested period
-        const existingReservation = yield app_1.prismaClient.reservation.findFirst({
+        const existingReservation = yield __1.prismaClient.reservation.findFirst({
             where: {
                 vehicleId: validatedReservation.vehicleId,
                 OR: [
@@ -65,12 +65,12 @@ const createReservation = (req, res) => __awaiter(void 0, void 0, void 0, functi
             return;
         }
         // Create the reservation
-        const newReservation = yield app_1.prismaClient.reservation.create({
+        const newReservation = yield __1.prismaClient.reservation.create({
             data: Object.assign(Object.assign({}, validatedReservation), { startDate: new Date(validatedReservation.startDate), endDate: new Date(validatedReservation.endDate) }),
         });
         // Update vehicle status if reservation status is CONFIRMED
         if (newReservation.status === "CONFIRMED") {
-            yield app_1.prismaClient.vehicle.update({
+            yield __1.prismaClient.vehicle.update({
                 where: { id: validatedReservation.vehicleId },
                 data: { status: "RENTED" },
             });
@@ -119,7 +119,7 @@ const updateReservation = (req, res) => __awaiter(void 0, void 0, void 0, functi
     try {
         const validatedData = reservationValidation_1.reservationUpdateSchema.parse(req.body);
         // Check if reservation exists
-        const existingReservation = yield app_1.prismaClient.reservation.findUnique({
+        const existingReservation = yield __1.prismaClient.reservation.findUnique({
             where: { id },
         });
         if (!existingReservation) {
@@ -129,7 +129,7 @@ const updateReservation = (req, res) => __awaiter(void 0, void 0, void 0, functi
         // Check if vehicle exists (if vehicleId is provided)
         if (validatedData.vehicleId &&
             validatedData.vehicleId !== existingReservation.vehicleId) {
-            const vehicle = yield app_1.prismaClient.vehicle.findUnique({
+            const vehicle = yield __1.prismaClient.vehicle.findUnique({
                 where: { id: validatedData.vehicleId },
             });
             if (!vehicle) {
@@ -143,7 +143,7 @@ const updateReservation = (req, res) => __awaiter(void 0, void 0, void 0, functi
         }
         // Check if client exists (if clientId is provided)
         if (validatedData.clientId) {
-            const client = yield app_1.prismaClient.client.findUnique({
+            const client = yield __1.prismaClient.client.findUnique({
                 where: { id: validatedData.clientId },
             });
             if (!client) {
@@ -155,7 +155,7 @@ const updateReservation = (req, res) => __awaiter(void 0, void 0, void 0, functi
         if (validatedData.startDate ||
             validatedData.endDate ||
             validatedData.vehicleId) {
-            const conflict = yield app_1.prismaClient.reservation.findFirst({
+            const conflict = yield __1.prismaClient.reservation.findFirst({
                 where: {
                     id: { not: id },
                     vehicleId: validatedData.vehicleId || existingReservation.vehicleId,
@@ -180,7 +180,7 @@ const updateReservation = (req, res) => __awaiter(void 0, void 0, void 0, functi
             }
         }
         // Update reservation
-        const updatedReservation = yield app_1.prismaClient.reservation.update({
+        const updatedReservation = yield __1.prismaClient.reservation.update({
             where: { id },
             data: Object.assign(Object.assign({}, validatedData), { startDate: validatedData.startDate
                     ? new Date(validatedData.startDate)
@@ -195,7 +195,7 @@ const updateReservation = (req, res) => __awaiter(void 0, void 0, void 0, functi
         // If status is CANCELED or PENDING, check if we need to update vehicle status
         if (newStatus === "CANCELED" || newStatus === "PENDING") {
             // First, check if there are any other active reservations for this vehicle
-            const otherActiveReservations = yield app_1.prismaClient.reservation.findFirst({
+            const otherActiveReservations = yield __1.prismaClient.reservation.findFirst({
                 where: {
                     vehicleId: currentVehicleId,
                     id: { not: id }, // Exclude the current reservation
@@ -205,7 +205,7 @@ const updateReservation = (req, res) => __awaiter(void 0, void 0, void 0, functi
             // If no other active reservations, set vehicle to AVAILABLE
             if (!otherActiveReservations) {
                 console.log(`Updating vehicle ${currentVehicleId} to AVAILABLE status`);
-                yield app_1.prismaClient.vehicle.update({
+                yield __1.prismaClient.vehicle.update({
                     where: { id: currentVehicleId },
                     data: { status: "AVAILABLE" },
                 });
@@ -214,7 +214,7 @@ const updateReservation = (req, res) => __awaiter(void 0, void 0, void 0, functi
         // If status is CONFIRMED, set vehicle to RENTED
         else if (newStatus === "CONFIRMED") {
             console.log(`Updating vehicle ${currentVehicleId} to RENTED status`);
-            yield app_1.prismaClient.vehicle.update({
+            yield __1.prismaClient.vehicle.update({
                 where: { id: currentVehicleId },
                 data: { status: "RENTED" },
             });
@@ -256,7 +256,7 @@ exports.updateReservation = updateReservation;
  */
 const getAllReservations = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const reservations = yield app_1.prismaClient.reservation.findMany({
+        const reservations = yield __1.prismaClient.reservation.findMany({
             include: {
                 vehicle: true,
                 client: true,
@@ -290,7 +290,7 @@ const getOneReservation = (req, res) => __awaiter(void 0, void 0, void 0, functi
         return;
     }
     try {
-        const reservation = yield app_1.prismaClient.reservation.findUnique({
+        const reservation = yield __1.prismaClient.reservation.findUnique({
             where: { id },
             include: {
                 vehicle: true,
@@ -329,7 +329,7 @@ const deleteReservation = (req, res) => __awaiter(void 0, void 0, void 0, functi
         return;
     }
     try {
-        const existing = yield app_1.prismaClient.reservation.findUnique({
+        const existing = yield __1.prismaClient.reservation.findUnique({
             where: { id },
         });
         if (!existing) {
@@ -337,11 +337,11 @@ const deleteReservation = (req, res) => __awaiter(void 0, void 0, void 0, functi
             return;
         }
         // Delete the reservation
-        yield app_1.prismaClient.reservation.delete({
+        yield __1.prismaClient.reservation.delete({
             where: { id },
         });
         // Check if there are any other active reservations for this vehicle
-        const activeReservations = yield app_1.prismaClient.reservation.findFirst({
+        const activeReservations = yield __1.prismaClient.reservation.findFirst({
             where: {
                 vehicleId: existing.vehicleId,
                 status: { in: ["CONFIRMED"] },
@@ -349,7 +349,7 @@ const deleteReservation = (req, res) => __awaiter(void 0, void 0, void 0, functi
         });
         // If no other active reservations, update vehicle status to AVAILABLE
         if (!activeReservations) {
-            yield app_1.prismaClient.vehicle.update({
+            yield __1.prismaClient.vehicle.update({
                 where: { id: existing.vehicleId },
                 data: { status: "AVAILABLE" },
             });
@@ -373,9 +373,9 @@ exports.deleteReservation = deleteReservation;
  */
 const deleteAllReservations = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        yield app_1.prismaClient.reservation.deleteMany();
+        yield __1.prismaClient.reservation.deleteMany();
         // Reset all vehicle statuses to AVAILABLE
-        yield app_1.prismaClient.vehicle.updateMany({
+        yield __1.prismaClient.vehicle.updateMany({
             data: { status: "AVAILABLE" },
         });
         res.status(200).json({

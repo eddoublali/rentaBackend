@@ -45,7 +45,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.login = exports.signup = void 0;
 const userValidation_1 = require("../schema/userValidation");
 const zod_1 = require("zod");
-const app_1 = require("..");
+const __1 = require("..");
 const bcrypt_1 = require("bcrypt");
 const jwt = __importStar(require("jsonwebtoken"));
 const secrets_1 = require("../secrets");
@@ -61,11 +61,11 @@ const signup = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         // Validate request body
         const validatedData = userValidation_1.signupSchema.parse(req.body);
         const { email, password, name, role } = validatedData;
-        let user = yield app_1.prismaClient.user.findUnique({ where: { email } });
+        let user = yield __1.prismaClient.user.findUnique({ where: { email } });
         if (user) {
             return res.status(400).json({ message: "Email already exists" });
         }
-        user = yield app_1.prismaClient.user.create({
+        user = yield __1.prismaClient.user.create({
             data: {
                 email,
                 name,
@@ -92,7 +92,7 @@ exports.signup = signup;
  */
 const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { email, password } = req.body;
-    let user = yield app_1.prismaClient.user.findFirst({ where: { email } });
+    let user = yield __1.prismaClient.user.findFirst({ where: { email } });
     if (!user) {
         return res.status(400).json({ message: "Invalid password Or email" });
     }

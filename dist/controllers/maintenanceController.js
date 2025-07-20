@@ -11,7 +11,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteMaintenance = exports.getOneMaintenance = exports.getAllMaintenances = exports.updateMaintenance = exports.createMaintenance = void 0;
 const maintenanceSchema_1 = require("./../schema/maintenanceSchema");
-const app_1 = require("..");
+const __1 = require("..");
 const zod_1 = require("zod");
 /**
  * @desc Create a new Maintenance
@@ -24,7 +24,7 @@ const createMaintenance = (req, res) => __awaiter(void 0, void 0, void 0, functi
         // Validate request body using Zod
         const validatedData = maintenanceSchema_1.maintenanceSchema.parse(req.body);
         // Create the maintenance record in the database using Prisma
-        const newMaintenance = yield app_1.prismaClient.maintenance.create({
+        const newMaintenance = yield __1.prismaClient.maintenance.create({
             data: validatedData,
         });
         res.status(201).json({
@@ -59,14 +59,14 @@ const updateMaintenance = (req, res) => __awaiter(void 0, void 0, void 0, functi
         // Validate request body using Zod
         const validatedData = maintenanceSchema_1.maintenanceUpdateSchema.parse(req.body);
         // Check if maintenance exists in the database
-        const existingMaintenance = yield app_1.prismaClient.maintenance.findUnique({
+        const existingMaintenance = yield __1.prismaClient.maintenance.findUnique({
             where: { id: Number(id) },
         });
         if (!existingMaintenance) {
             res.status(404).json({ message: "Maintenance not found." });
         }
         // Update the maintenance record in the database using Prisma
-        const updatedMaintenance = yield app_1.prismaClient.maintenance.update({
+        const updatedMaintenance = yield __1.prismaClient.maintenance.update({
             where: { id: Number(id) },
             data: validatedData,
         });
@@ -98,7 +98,7 @@ exports.updateMaintenance = updateMaintenance;
  */
 const getAllMaintenances = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const maintenances = yield app_1.prismaClient.maintenance.findMany();
+        const maintenances = yield __1.prismaClient.maintenance.findMany();
         res.status(200).json({
             message: "Maintenances retrieved successfully.",
             data: maintenances,
@@ -121,7 +121,7 @@ exports.getAllMaintenances = getAllMaintenances;
 const getOneMaintenance = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { id } = req.params;
-        const maintenance = yield app_1.prismaClient.maintenance.findUnique({
+        const maintenance = yield __1.prismaClient.maintenance.findUnique({
             where: { id: Number(id) },
         });
         console.log("Fetching maintenance ID:", id);
@@ -151,7 +151,7 @@ exports.getOneMaintenance = getOneMaintenance;
 const deleteMaintenance = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { id } = req.params;
-        const deletedMaintenance = yield app_1.prismaClient.maintenance.delete({
+        const deletedMaintenance = yield __1.prismaClient.maintenance.delete({
             where: { id: Number(id) },
         });
         res.status(200).json({

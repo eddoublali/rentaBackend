@@ -10,7 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteAllAccidents = exports.deleteAccidentById = exports.getOneAccident = exports.getAllAccidents = exports.updateAccident = exports.createAccident = void 0;
-const app_1 = require("..");
+const __1 = require("..");
 const accidentValidation_1 = require("../schema/accidentValidation");
 const zod_1 = require("zod");
 // Helper functions to reduce code duplication
@@ -69,7 +69,7 @@ const createAccident = (req, res) => __awaiter(void 0, void 0, void 0, function*
     try {
         const validatedData = accidentValidation_1.accidentSchema.parse(req.body);
         const photosJson = processDamagePhotos(req.files, validatedData.damagePhotos);
-        const accident = yield app_1.prismaClient.accident.create({
+        const accident = yield __1.prismaClient.accident.create({
             data: {
                 vehicleId: validatedData.vehicleId,
                 clientId: (_a = validatedData.clientId) !== null && _a !== void 0 ? _a : null,
@@ -107,7 +107,7 @@ const updateAccident = (req, res) => __awaiter(void 0, void 0, void 0, function*
             return;
         }
         // Check if accident exists
-        const existingAccident = yield app_1.prismaClient.accident.findUnique({
+        const existingAccident = yield __1.prismaClient.accident.findUnique({
             where: { id: accidentId },
         });
         if (!existingAccident) {
@@ -116,7 +116,7 @@ const updateAccident = (req, res) => __awaiter(void 0, void 0, void 0, function*
         }
         const validatedData = accidentValidation_1.accidentUpdateSchema.parse(req.body);
         const photosJson = processDamagePhotos(req.files, (_a = validatedData.damagePhotos) !== null && _a !== void 0 ? _a : existingAccident.damagePhotos);
-        const updatedAccident = yield app_1.prismaClient.accident.update({
+        const updatedAccident = yield __1.prismaClient.accident.update({
             where: { id: accidentId },
             data: {
                 vehicleId: validatedData.vehicleId,
@@ -148,7 +148,7 @@ exports.updateAccident = updateAccident;
  */
 const getAllAccidents = (_req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const accidents = yield app_1.prismaClient.accident.findMany({
+        const accidents = yield __1.prismaClient.accident.findMany({
             include: {
                 vehicle: true,
                 client: true,
@@ -180,7 +180,7 @@ const getOneAccident = (req, res) => __awaiter(void 0, void 0, void 0, function*
             sendResponse(res, 400, { success: false, message: 'Invalid accident ID' });
             return;
         }
-        const accident = yield app_1.prismaClient.accident.findUnique({
+        const accident = yield __1.prismaClient.accident.findUnique({
             where: { id: accidentId },
             include: {
                 vehicle: true,
@@ -217,14 +217,14 @@ const deleteAccidentById = (req, res) => __awaiter(void 0, void 0, void 0, funct
             return;
         }
         // Check if accident exists
-        const existingAccident = yield app_1.prismaClient.accident.findUnique({
+        const existingAccident = yield __1.prismaClient.accident.findUnique({
             where: { id: accidentId },
         });
         if (!existingAccident) {
             sendResponse(res, 404, { success: false, message: 'Accident not found' });
             return;
         }
-        yield app_1.prismaClient.accident.delete({
+        yield __1.prismaClient.accident.delete({
             where: { id: accidentId },
         });
         sendResponse(res, 200, {
@@ -244,7 +244,7 @@ exports.deleteAccidentById = deleteAccidentById;
  */
 const deleteAllAccidents = (_req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        yield app_1.prismaClient.accident.deleteMany({});
+        yield __1.prismaClient.accident.deleteMany({});
         sendResponse(res, 200, {
             success: true,
             message: 'All accidents deleted successfully',

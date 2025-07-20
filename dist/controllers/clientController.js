@@ -11,7 +11,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteClient = exports.getClientById = exports.getAllClients = exports.updateClient = exports.createClient = void 0;
 const clientValidation_1 = require("./../schema/clientValidation");
-const app_1 = require("..");
+const __1 = require("..");
 const zod_1 = require("zod");
 /**
  * @desc Create a new client
@@ -27,7 +27,7 @@ const createClient = (req, res) => __awaiter(void 0, void 0, void 0, function* (
             // Parse the string to boolean
             req.body.blacklisted = req.body.blacklisted === 'true' || req.body.blacklisted === '1';
         }
-        const existingClient = yield app_1.prismaClient.client.findUnique({
+        const existingClient = yield __1.prismaClient.client.findUnique({
             where: { email: validatedClient.email },
         });
         if (existingClient) {
@@ -37,7 +37,7 @@ const createClient = (req, res) => __awaiter(void 0, void 0, void 0, function* (
         const files = req.files;
         const cinimage = (files === null || files === void 0 ? void 0 : files.cinimage) ? `/uploads/${files.cinimage[0].filename}` : '';
         const licenseimage = (files === null || files === void 0 ? void 0 : files.licenseimage) ? `/uploads/${files.licenseimage[0].filename}` : '';
-        const client = yield app_1.prismaClient.client.create({
+        const client = yield __1.prismaClient.client.create({
             data: Object.assign(Object.assign({}, validatedClient), { cinimage,
                 licenseimage }),
         });
@@ -72,7 +72,7 @@ const updateClient = (req, res) => __awaiter(void 0, void 0, void 0, function* (
             req.body.blacklisted = req.body.blacklisted === 'true' || req.body.blacklisted === '1';
         }
         const validatedClient = clientValidation_1.clientUpdateSchema.parse(req.body);
-        const existingClient = yield app_1.prismaClient.client.findUnique({
+        const existingClient = yield __1.prismaClient.client.findUnique({
             where: { id: userId },
         });
         if (!existingClient) {
@@ -80,7 +80,7 @@ const updateClient = (req, res) => __awaiter(void 0, void 0, void 0, function* (
             return;
         }
         if (existingClient.email !== validatedClient.email) {
-            const clientWithEmail = yield app_1.prismaClient.client.findUnique({
+            const clientWithEmail = yield __1.prismaClient.client.findUnique({
                 where: { email: validatedClient.email },
             });
             if (clientWithEmail) {
@@ -91,7 +91,7 @@ const updateClient = (req, res) => __awaiter(void 0, void 0, void 0, function* (
         const files = req.files;
         const cinimage = (files === null || files === void 0 ? void 0 : files.cinimage) ? `/uploads/${files.cinimage[0].filename}` : existingClient.cinimage;
         const licenseimage = (files === null || files === void 0 ? void 0 : files.licenseimage) ? `/uploads/${files.licenseimage[0].filename}` : existingClient.licenseimage;
-        const updatedClient = yield app_1.prismaClient.client.update({
+        const updatedClient = yield __1.prismaClient.client.update({
             where: { id: userId },
             data: Object.assign(Object.assign({}, validatedClient), { cinimage,
                 licenseimage, blacklisted: validatedClient.blacklisted }),
@@ -115,7 +115,7 @@ exports.updateClient = updateClient;
  */
 const getAllClients = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const clients = yield app_1.prismaClient.client.findMany({
+        const clients = yield __1.prismaClient.client.findMany({
             include: {
                 infractions: true,
                 reservations: true,
@@ -146,7 +146,7 @@ const getClientById = (req, res) => __awaiter(void 0, void 0, void 0, function* 
         if (isNaN(userId)) {
             res.status(400).json({ message: 'Invalid Client ID' });
         }
-        const client = yield app_1.prismaClient.client.findUnique({
+        const client = yield __1.prismaClient.client.findUnique({
             where: { id: userId },
             include: {
                 infractions: true,
@@ -182,14 +182,14 @@ const deleteClient = (req, res) => __awaiter(void 0, void 0, void 0, function* (
         if (isNaN(userId)) {
             res.status(400).json({ message: 'Invalid Client ID' });
         }
-        const existingClient = yield app_1.prismaClient.client.findUnique({
+        const existingClient = yield __1.prismaClient.client.findUnique({
             where: { id: userId },
         });
         if (!existingClient) {
             res.status(404).json({ message: 'Client not found' });
             return;
         }
-        yield app_1.prismaClient.client.delete({
+        yield __1.prismaClient.client.delete({
             where: { id: userId },
         });
         res.status(200).json({ message: 'Client deleted successfully' });

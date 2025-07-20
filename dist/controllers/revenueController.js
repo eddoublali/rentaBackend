@@ -10,14 +10,14 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getOneRevenue = exports.getSpecificMonthRevenue = exports.getMonthlyRevenue = exports.getAllRevenues = void 0;
-const app_1 = require("..");
+const __1 = require("..");
 /**
  * @desc Get all revenues with monthly breakdown
  * @route GET /api/revenue/
  */
 const getAllRevenues = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const revenues = yield app_1.prismaClient.revenue.findMany({
+        const revenues = yield __1.prismaClient.revenue.findMany({
             include: {
                 client: true,
                 contract: true,
@@ -44,7 +44,7 @@ const getMonthlyRevenue = (req, res) => __awaiter(void 0, void 0, void 0, functi
         // Get year from query param or use current year
         const year = req.query.year ? Number(req.query.year) : new Date().getFullYear();
         // Get all revenues for the specified year
-        const revenues = yield app_1.prismaClient.revenue.findMany({
+        const revenues = yield __1.prismaClient.revenue.findMany({
             where: {
                 createdAt: {
                     gte: new Date(`${year}-01-01`),
@@ -104,7 +104,7 @@ const getSpecificMonthRevenue = (req, res) => __awaiter(void 0, void 0, void 0, 
             return;
         }
         // Get revenues for the specified month and year
-        const revenues = yield app_1.prismaClient.revenue.findMany({
+        const revenues = yield __1.prismaClient.revenue.findMany({
             where: {
                 createdAt: {
                     gte: new Date(`${year}-${month.toString().padStart(2, '0')}-01`),
@@ -143,7 +143,7 @@ const getOneRevenue = (req, res) => __awaiter(void 0, void 0, void 0, function* 
             res.status(400).json({ message: 'Invalid revenue ID' });
             return;
         }
-        const revenue = yield app_1.prismaClient.revenue.findUnique({
+        const revenue = yield __1.prismaClient.revenue.findUnique({
             where: { id: revenueId },
             include: {
                 client: true,

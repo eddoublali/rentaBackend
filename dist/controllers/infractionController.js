@@ -11,7 +11,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getInfractionsByClient = exports.deleteAllInfractions = exports.deleteInfraction = exports.getOneInfraction = exports.getAllInfractions = exports.updateInfraction = exports.createInfraction = void 0;
 const infractiontValidation_1 = require("./../schema/infractiontValidation");
-const app_1 = require("..");
+const __1 = require("..");
 const zod_1 = require("zod");
 /**
  * @desc Create a new infraction
@@ -24,7 +24,7 @@ const createInfraction = (req, res) => __awaiter(void 0, void 0, void 0, functio
         // Validate the request body
         const validatedInfraction = infractiontValidation_1.infractionSchema.parse(req.body);
         // Check if the related vehicle exists
-        const vehicleExists = yield app_1.prismaClient.vehicle.findUnique({
+        const vehicleExists = yield __1.prismaClient.vehicle.findUnique({
             where: { id: validatedInfraction.vehicleId },
         });
         if (!vehicleExists) {
@@ -32,7 +32,7 @@ const createInfraction = (req, res) => __awaiter(void 0, void 0, void 0, functio
             return;
         }
         // Create the new infraction
-        const newInfraction = yield app_1.prismaClient.infraction.create({
+        const newInfraction = yield __1.prismaClient.infraction.create({
             data: validatedInfraction,
         });
         res.status(201).json({
@@ -68,7 +68,7 @@ const updateInfraction = (req, res) => __awaiter(void 0, void 0, void 0, functio
         }
         const validatedInfraction = infractiontValidation_1.infractionUpdateSchema.parse(req.body);
         // Check if the infraction exists
-        const infractionExists = yield app_1.prismaClient.infraction.findUnique({
+        const infractionExists = yield __1.prismaClient.infraction.findUnique({
             where: { id: Number(id) },
         });
         if (!infractionExists) {
@@ -77,7 +77,7 @@ const updateInfraction = (req, res) => __awaiter(void 0, void 0, void 0, functio
         }
         // Check if the related vehicle exists for update
         if (validatedInfraction.vehicleId) {
-            const vehicleExists = yield app_1.prismaClient.vehicle.findUnique({
+            const vehicleExists = yield __1.prismaClient.vehicle.findUnique({
                 where: { id: validatedInfraction.vehicleId },
             });
             if (!vehicleExists) {
@@ -86,7 +86,7 @@ const updateInfraction = (req, res) => __awaiter(void 0, void 0, void 0, functio
             }
         }
         // Update the infraction in the database
-        const updatedInfraction = yield app_1.prismaClient.infraction.update({
+        const updatedInfraction = yield __1.prismaClient.infraction.update({
             where: { id: Number(id) },
             data: validatedInfraction,
         });
@@ -115,7 +115,7 @@ exports.updateInfraction = updateInfraction;
  */
 const getAllInfractions = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const infractions = yield app_1.prismaClient.infraction.findMany({
+        const infractions = yield __1.prismaClient.infraction.findMany({
             include: {
                 client: true,
                 vehicle: true
@@ -147,7 +147,7 @@ const getOneInfraction = (req, res) => __awaiter(void 0, void 0, void 0, functio
             res.status(400).json({ message: 'Invalid Infraction id' });
             return;
         }
-        const infraction = yield app_1.prismaClient.infraction.findUnique({
+        const infraction = yield __1.prismaClient.infraction.findUnique({
             where: { id: Number(id) },
             include: {
                 client: true,
@@ -185,7 +185,7 @@ const deleteInfraction = (req, res) => __awaiter(void 0, void 0, void 0, functio
             return;
         }
         // Check if the infraction exists
-        const infractionExists = yield app_1.prismaClient.infraction.findUnique({
+        const infractionExists = yield __1.prismaClient.infraction.findUnique({
             where: { id: Number(id) },
         });
         if (!infractionExists) {
@@ -193,7 +193,7 @@ const deleteInfraction = (req, res) => __awaiter(void 0, void 0, void 0, functio
             return;
         }
         // Delete the infraction
-        const deletedInfraction = yield app_1.prismaClient.infraction.delete({
+        const deletedInfraction = yield __1.prismaClient.infraction.delete({
             where: { id: Number(id) },
         });
         res.status(200).json({
@@ -217,7 +217,7 @@ exports.deleteInfraction = deleteInfraction;
 const deleteAllInfractions = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         // Delete all infractions from the database
-        const deletedInfractions = yield app_1.prismaClient.infraction.deleteMany();
+        const deletedInfractions = yield __1.prismaClient.infraction.deleteMany();
         res.status(200).json({
             message: `All infractions deleted successfully`,
             data: deletedInfractions,
@@ -244,7 +244,7 @@ const getInfractionsByClient = (req, res) => __awaiter(void 0, void 0, void 0, f
             res.status(400).json({ message: 'Invalid client ID' });
             return;
         }
-        const infractions = yield app_1.prismaClient.infraction.findMany({
+        const infractions = yield __1.prismaClient.infraction.findMany({
             where: { clientId: id },
             include: {
                 client: true,

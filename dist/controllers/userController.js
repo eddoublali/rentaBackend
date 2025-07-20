@@ -10,7 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteUser = exports.updateUser = exports.getOneUser = exports.getAllUsers = void 0;
-const app_1 = require("..");
+const __1 = require("..");
 const bcrypt_1 = require("bcrypt");
 /**
  * @desc Get all users
@@ -21,7 +21,7 @@ const bcrypt_1 = require("bcrypt");
 const getAllUsers = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         // Fetch all users from the database
-        const users = yield app_1.prismaClient.user.findMany();
+        const users = yield __1.prismaClient.user.findMany();
         res.status(200).json({ message: 'Users fetched successfully', users });
     }
     catch (error) {
@@ -44,7 +44,7 @@ const getOneUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
             res.status(400).json({ message: 'Invalid user ID' });
         }
         // Fetch the user from the database by ID
-        const user = yield app_1.prismaClient.user.findUnique({
+        const user = yield __1.prismaClient.user.findUnique({
             where: { id: userId }, // Ensure the id is a number
         });
         if (!user) {
@@ -75,7 +75,7 @@ const updateUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
         }
         const { email, name, password, role } = req.body; // Get updated data
         // Validate the user data
-        const userExists = yield app_1.prismaClient.user.findUnique({
+        const userExists = yield __1.prismaClient.user.findUnique({
             where: { id: userId },
         });
         if (!userExists) {
@@ -83,7 +83,7 @@ const updateUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
         }
         // Check if the email is being changed and if it already exists
         if (email !== (userExists === null || userExists === void 0 ? void 0 : userExists.email)) {
-            const emailExists = yield app_1.prismaClient.user.findUnique({
+            const emailExists = yield __1.prismaClient.user.findUnique({
                 where: { email },
             });
             if (emailExists) {
@@ -96,7 +96,7 @@ const updateUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
             updatedData.password = (0, bcrypt_1.hashSync)(password, 10);
         }
         // Update the user in the database
-        const updatedUser = yield app_1.prismaClient.user.update({
+        const updatedUser = yield __1.prismaClient.user.update({
             where: { id: Number(id) },
             data: updatedData,
         });
@@ -126,14 +126,14 @@ const deleteUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
             res.status(400).json({ message: 'Invalid user ID' });
         }
         // Check if the user exists
-        const userExists = yield app_1.prismaClient.user.findUnique({
+        const userExists = yield __1.prismaClient.user.findUnique({
             where: { id: userId },
         });
         if (!userExists) {
             res.status(404).json({ message: 'User not found' });
         }
         // Delete the user from the database
-        yield app_1.prismaClient.user.delete({
+        yield __1.prismaClient.user.delete({
             where: { id: Number(id) },
         });
         res.status(200).json({ message: 'User deleted successfully' });

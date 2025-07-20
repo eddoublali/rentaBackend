@@ -11,7 +11,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteContract = exports.updateContract = exports.getContractById = exports.getAllContracts = exports.createContract = void 0;
 const zod_1 = require("zod");
-const app_1 = require("..");
+const __1 = require("..");
 const contractValidation_1 = require("../schema/contractValidation");
 /**
  * Create a new contract
@@ -23,7 +23,7 @@ const createContract = (req, res) => __awaiter(void 0, void 0, void 0, function*
         // Validate request body
         const validatedData = contractValidation_1.contractSchema.parse(req.body);
         // Verify vehicle exists
-        const vehicle = yield app_1.prismaClient.vehicle.findUnique({
+        const vehicle = yield __1.prismaClient.vehicle.findUnique({
             where: { id: validatedData.vehicleId },
         });
         if (!vehicle) {
@@ -31,7 +31,7 @@ const createContract = (req, res) => __awaiter(void 0, void 0, void 0, function*
             return;
         }
         // Verify reservation exists
-        const reservation = yield app_1.prismaClient.reservation.findUnique({
+        const reservation = yield __1.prismaClient.reservation.findUnique({
             where: { id: validatedData.reservationId },
         });
         if (!reservation) {
@@ -39,7 +39,7 @@ const createContract = (req, res) => __awaiter(void 0, void 0, void 0, function*
             return;
         }
         // Verify primary client exists
-        const client = yield app_1.prismaClient.client.findUnique({
+        const client = yield __1.prismaClient.client.findUnique({
             where: { id: validatedData.clientId },
         });
         if (!client) {
@@ -48,7 +48,7 @@ const createContract = (req, res) => __awaiter(void 0, void 0, void 0, function*
         }
         // Verify second driver client if provided
         if (validatedData.secondDriver && validatedData.clientSeconId) {
-            const secondClient = yield app_1.prismaClient.client.findUnique({
+            const secondClient = yield __1.prismaClient.client.findUnique({
                 where: { id: validatedData.clientSeconId },
             });
             if (!secondClient) {
@@ -61,10 +61,10 @@ const createContract = (req, res) => __awaiter(void 0, void 0, void 0, function*
             }
         }
         // Create contract
-        const newContract = yield app_1.prismaClient.contract.create({
+        const newContract = yield __1.prismaClient.contract.create({
             data: Object.assign(Object.assign({}, validatedData), { accessories: validatedData.accessories || [], documents: validatedData.documents || [] }),
         });
-        const revenue = yield app_1.prismaClient.revenue.create({
+        const revenue = yield __1.prismaClient.revenue.create({
             data: {
                 clientId: validatedData.clientId,
                 contractId: newContract.id,
@@ -76,11 +76,11 @@ const createContract = (req, res) => __awaiter(void 0, void 0, void 0, function*
         });
         // Update related records
         const [_, updatedReservation] = yield Promise.all([
-            app_1.prismaClient.vehicle.update({
+            __1.prismaClient.vehicle.update({
                 where: { id: validatedData.vehicleId },
                 data: { status: "RENTED" },
             }),
-            app_1.prismaClient.reservation.updateMany({
+            __1.prismaClient.reservation.updateMany({
                 where: { id: validatedData.reservationId },
                 data: { status: "CONFIRMED" },
             }),
@@ -119,7 +119,7 @@ exports.createContract = createContract;
  */
 const getAllContracts = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const contracts = yield app_1.prismaClient.contract.findMany({
+        const contracts = yield __1.prismaClient.contract.findMany({
             include: {
                 vehicle: true,
                 client: true,
@@ -150,7 +150,7 @@ exports.getAllContracts = getAllContracts;
 const getContractById = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { id } = req.params;
-        const contract = yield app_1.prismaClient.contract.findUnique({
+        const contract = yield __1.prismaClient.contract.findUnique({
             where: { id: Number(id) },
             include: {
                 client: true,
@@ -196,7 +196,7 @@ const updateContract = (req, res) => __awaiter(void 0, void 0, void 0, function*
     try {
         const { id } = req.params;
         // Check if contract exists before attempting update
-        const existingContract = yield app_1.prismaClient.contract.findUnique({
+        const existingContract = yield __1.prismaClient.contract.findUnique({
             where: { id: Number(id) },
         });
         if (!existingContract) {
@@ -210,7 +210,7 @@ const updateContract = (req, res) => __awaiter(void 0, void 0, void 0, function*
         const validatedData = contractValidation_1.contractUpdateSchema.parse(req.body);
         // If vehicle is being updated, verify it exists
         if (validatedData.vehicleId) {
-            const vehicle = yield app_1.prismaClient.vehicle.findUnique({
+            const vehicle = yield __1.prismaClient.vehicle.findUnique({
                 where: { id: validatedData.vehicleId },
             });
             if (!vehicle) {
@@ -220,7 +220,7 @@ const updateContract = (req, res) => __awaiter(void 0, void 0, void 0, function*
         }
         // If reservation is being updated, verify it exists
         if (validatedData.reservationId) {
-            const reservation = yield app_1.prismaClient.reservation.findUnique({
+            const reservation = yield __1.prismaClient.reservation.findUnique({
                 where: { id: validatedData.reservationId },
             });
             if (!reservation) {
@@ -230,7 +230,7 @@ const updateContract = (req, res) => __awaiter(void 0, void 0, void 0, function*
         }
         // If client is being updated, verify it exists
         if (validatedData.clientId) {
-            const client = yield app_1.prismaClient.client.findUnique({
+            const client = yield __1.prismaClient.client.findUnique({
                 where: { id: validatedData.clientId },
             });
             if (!client) {
@@ -241,7 +241,7 @@ const updateContract = (req, res) => __awaiter(void 0, void 0, void 0, function*
         // Verify second driver client if provided in update
         if (validatedData.secondDriver && validatedData.clientSeconId) {
             // Check if the second driver exists
-            const secondClient = yield app_1.prismaClient.client.findUnique({
+            const secondClient = yield __1.prismaClient.client.findUnique({
                 where: { id: validatedData.clientSeconId },
             });
             if (!secondClient) {
@@ -259,7 +259,7 @@ const updateContract = (req, res) => __awaiter(void 0, void 0, void 0, function*
             }
         }
         // Update the contract
-        const updatedContract = yield app_1.prismaClient.contract.update({
+        const updatedContract = yield __1.prismaClient.contract.update({
             where: { id: Number(id) },
             data: Object.assign(Object.assign({}, validatedData), { 
                 // Ensure arrays are handled correctly
@@ -272,12 +272,12 @@ const updateContract = (req, res) => __awaiter(void 0, void 0, void 0, function*
         // Handle related record updates if needed
         if (validatedData.vehicleId && validatedData.vehicleId !== existingContract.vehicleId) {
             // Update old vehicle status if applicable
-            yield app_1.prismaClient.vehicle.update({
+            yield __1.prismaClient.vehicle.update({
                 where: { id: existingContract.vehicleId },
                 data: { status: "AVAILABLE" },
             });
             // Update new vehicle status
-            yield app_1.prismaClient.vehicle.update({
+            yield __1.prismaClient.vehicle.update({
                 where: { id: validatedData.vehicleId },
                 data: { status: "RENTED" },
             });
@@ -316,7 +316,7 @@ const deleteContract = (req, res) => __awaiter(void 0, void 0, void 0, function*
     try {
         const { id } = req.params;
         // Check if contract exists
-        const contract = yield app_1.prismaClient.contract.findUnique({
+        const contract = yield __1.prismaClient.contract.findUnique({
             where: { id: Number(id) },
         });
         if (!contract) {
@@ -327,7 +327,7 @@ const deleteContract = (req, res) => __awaiter(void 0, void 0, void 0, function*
             return;
         }
         // Delete the contract
-        yield app_1.prismaClient.contract.delete({
+        yield __1.prismaClient.contract.delete({
             where: { id: Number(id) },
         });
         res.status(200).json({
