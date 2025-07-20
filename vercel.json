@@ -2,22 +2,22 @@
   "version": 2,
   "builds": [
     {
-      "src": "index.js",
+      "src": "dist/index.js",
       "use": "@vercel/node"
     },
     {
-      "src": "ipa/index.ts",
+      "src": "dist/ipa/index.js",
       "use": "@vercel/node"
     }
   ],
   "routes": [
     {
       "src": "/ipa/(.*)",
-      "dest": "/ipa/index.js"
+      "dest": "/dist/ipa/index.js"
     },
     {
       "src": "/(.*)",
-      "dest": "index.ts"
+      "dest": "/dist/index.js"
     }
   ]
 }
