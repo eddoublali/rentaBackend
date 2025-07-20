@@ -13,6 +13,6 @@
     }
   ],
   "env": {
-    "DATABASE_URL": "@database-url"
+    "DATABASE_URL": "mysql://u283788768_zeddoublali:Zakarya@2001@2020@srv1024.hstgr.io:3306/u283788768_rentadb"
   }
 }
