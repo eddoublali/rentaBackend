@@ -7,7 +7,15 @@
     "build": "tsc",
     "start": "node dist/app.js",
     "dev": "nodemon src/app.ts",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate",
+    "vercel-build": "npm run build && prisma generate"
+  },
+  "vercel": {
+    "functions": {
+      "dist/app.js": {
+        "maxDuration": 30
+      }
+    }
   },
   "keywords": [],
   "author": "",
