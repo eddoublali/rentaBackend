@@ -35,7 +35,9 @@ app.get("/", (req, res) => {
 
 // Root router
 app.use("/api", routes);
-
+app.get('/', (req, res) => {
+  res.json({ message: 'Server is running!' });
+});
 // Not found Handler middleware
 app.use(notFound);
 
