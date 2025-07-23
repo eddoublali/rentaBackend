@@ -358,6 +358,38 @@ export const getAvailableVehicles = async (req: Request, res: Response): Promise
   }
 };
 
+// controllers/vehicleController.ts
+
+export const getRentedVehiclesWithContracts = async (req: Request, res: Response) => {
+  try {
+    const rentals = await prismaClient.contract.findMany({
+      where: {
+        // Optional: filter active contracts only
+        startDate: { lte: new Date() },
+        endDate: { gte: new Date() },
+      },
+      include: {
+        vehicle: true,
+        client: true,
+      },
+    });
+
+    const calendarEvents = rentals.map(rental => ({
+      id: rental.id,
+      title: `${rental.vehicle.brand} ${rental.vehicle.model}`,
+      start: rental.startDate,
+      end: rental.endDate,
+      location: rental.deliveryLocation,
+      vehicleId: rental.vehicleId,
+      clientName: `${rental.client.name} ${rental.client.Lastname}`,
+    }));
+
+    res.status(200).json({ events: calendarEvents });
+  } catch (error) {
+    console.error("Error fetching rentals:", error);
+    res.status(500).json({ message: "Failed to fetch rental data" });
+  }
+};
 
 
 

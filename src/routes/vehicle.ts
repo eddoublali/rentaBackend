@@ -5,6 +5,7 @@ import {
   deleteVehicle,
   getAllVehicles,
   getAvailableVehicles,
+  getRentedVehiclesWithContracts,
   getVehicle,
   updateVehicle,
 } from "../controllers/vehicleController";
@@ -72,5 +73,12 @@ vehicleRouter.delete(
   adminMiddleware,
   deleteVehicle
 );
+
+vehicleRouter.get(
+  "/calendar/rentals",
+  authMiddleware as RequestHandler,
+  getRentedVehiclesWithContracts
+);
+
 
 export default vehicleRouter;
